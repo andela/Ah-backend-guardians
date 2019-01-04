@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -42,9 +43,11 @@ class LoginAPIView(APIView):
         # anything to save. Instead, the `validate` method on our serializer
         # handles everything we need.
         serializer = self.serializer_class(data=user)
-        serializer.is_valid(raise_exception=True)
+        if serializer.is_valid(raise_exception=True):
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
