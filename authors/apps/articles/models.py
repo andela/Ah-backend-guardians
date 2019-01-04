@@ -6,8 +6,10 @@ class Article(models.Model):
     description = models.CharField(max_length=255, blank=False, null=True)
     body = models.TextField(blank=False)
     slug = models.SlugField(max_length=140, unique=True, null=True)
+    image = models.TextField(blank=False, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    
 
     def __str__(self):
         return str(self.title)
