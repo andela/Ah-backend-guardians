@@ -44,6 +44,7 @@ class LoginSerializer(serializers.Serializer):
         # our database.
         email = data.get('email', None)
         password = data.get('password', None)
+        token = authenticate(request=None)
 
         # As mentioned above, an email is required. Raise an exception if an
         # email is not provided.
