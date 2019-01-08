@@ -93,6 +93,15 @@ DATABASES = {
     }
 }
 
+# test coverage
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+   '--with-coverage',
+   '--cover-package=authors',
+   '--cover-tests',
+]
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
