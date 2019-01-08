@@ -26,7 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = True
 EMAIL_PORT = config('EMAIL_PORT')
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])
 
 # Application definition
 
