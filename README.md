@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/andela/Ah-backend-guardians.svg?branch=develop)](https://travis-ci.org/andela/Ah-backend-guardians) [![Coverage Status](https://coveralls.io/repos/github/andela/Ah-backend-guardians/badge.svg?branch=ch-integrate-coveralls-162685656)](https://coveralls.io/github/andela/Ah-backend-guardians?branch=ch-integrate-coveralls-162685656)
+[![Build Status](https://travis-ci.org/andela/Ah-backend-guardians.svg?branch=develop)](https://travis-ci.org/andela/Ah-backend-guardians) [![Coverage Status](https://coveralls.io/repos/github/andela/Ah-backend-guardians/badge.svg?branch=develop)](https://coveralls.io/github/andela/Ah-backend-guardians?branch=develop)
 
 Authors Haven - A Social platform for the creative at heart.
 =======
