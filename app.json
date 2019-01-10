@@ -1,0 +1,46 @@
+{
+    "name": "Ah-backend-guardians",
+    "scripts": {
+    },
+    "env": {
+      "ALLOWED_HOSTS": {
+        "required": true
+      },
+      "DB_HOST": {
+        "required": true
+      },"DB_NAME": {
+        "required": true
+      },
+      "DB_PASSWORD": {
+        "required": true
+      },
+      "DB_USER": {
+        "required": true
+      },
+      "EMAIL_HOST": {
+        "required": true
+      },
+      "EMAIL_HOST_PASSWORD": {
+        "required": true
+      },
+      "EMAIL_HOST_USER": {
+        "required": true
+      },
+      "EMAIL_PORT": {
+        "required": true
+      },
+      "SECRET_KEY": {
+        "required": true
+      }
+    },
+    "formation": {
+    },
+    "addons": [
+      "heroku-postgresql"
+    ],
+    "stack": "heroku-18",
+    "buildpacks": [
+  
+    ]
+    
+  }
