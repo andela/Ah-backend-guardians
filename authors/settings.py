@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
+import django_heroku
 import os
 from decouple import config, Csv
 
@@ -138,6 +139,8 @@ CORS_ORIGIN_WHITELIST = (
 # the `authentication` module. This module is registered above in a setting
 # called `INSTALLED_APPS`.
 AUTH_USER_MODEL = 'authentication.User'
+#Activate Django-Heroku
+django_heroku.settings(locals())
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'authors.apps.core.exceptions.core_exception_handler',
