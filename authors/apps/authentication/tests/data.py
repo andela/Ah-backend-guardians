@@ -5,6 +5,8 @@ user_data = {
     "password": "Testma101"
 }
 
+
+
 user_data_no_username = {
     "username": None,
     "email": "test@andela23.com",
@@ -41,7 +43,7 @@ user1 = {
     "user": {
         "username": "makabugo",
         "email": "makabugo@andela.com",
-        "password": "simulman2101"
+        "password": "Simulman2101"
         }
     }
 
@@ -67,3 +69,40 @@ user_update = {
         "password": "simulman2101"
         }
     }
+
+short_password = {
+    "user": {
+        "username": "testuser",
+        "email": "testsims@andela.com",
+        "password": "test"
+        }
+    }
+
+invalid_username = {
+    "user": {
+        "username": "tes()",
+        "email": "testsims@andela.com",
+        "password": "Test@567"
+        }
+    }
+
+
+
+poor_conventions_password = {
+    "user": {
+        "username": "testuser",
+        "email": "test.sims@andela.com",
+        "password": "testerrrr"
+        }
+    }
+
+short_username = {
+    "user": {
+        "username": "tes",
+        "email": "test.sims@andela.com",
+        "password": "Test@567"
+        }
+    }
+
+
+
