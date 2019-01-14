@@ -1,0 +1,104 @@
+[
+{
+  "model": "authentication.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$52JpwAC2HZds$sG8ALcbugWcPvFO7TshZI1J/DXTZYhRHec0Nc0921Vw=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "myrdstom",
+    "email": "nserekopaul@gmail.com",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2019-01-15T08:15:37.696Z",
+    "updated_at": "2019-01-15T08:15:37.696Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$XKnQKDWant5C$5sOHwWnyOPJHt+nPf6D+fV/hE5IuEm+HAoP4h5CwRJE=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "bgpeter",
+    "email": "bgpeter@gmail.com",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2019-01-15T08:50:55.893Z",
+    "updated_at": "2019-01-15T08:50:55.893Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$GHGKmkpdDduJ$RmJ3KZL/E+GfMQaLaMPvKLJ2OoN4F9ZIbq3kSGbiG/8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "soultek",
+    "email": "soultekr@gmail.com",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2019-01-15T08:54:17.657Z",
+    "updated_at": "2019-01-15T08:54:17.657Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.user",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$Fwxse9BrFUoM$I7+ocDIJuv9v9u2bHJOwUGp4G6B2+NBQubgnfZ0I8zk=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "fahad",
+    "email": "f.faraqhan@gmail.com",
+    "is_active": false,
+    "is_staff": false,
+    "created_at": "2019-01-15T15:11:48.995Z",
+    "updated_at": "2019-01-15T15:11:49.014Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.user",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$pTLVmPYWXpnM$XRRe2/VF9WvS9ztNYQ3tfTXJB4/5wnQeHvJdacwaFWc=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "paul",
+    "email": "paul.kayongo@andela.com",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2019-01-15T15:13:20.903Z",
+    "updated_at": "2019-01-15T15:13:46.411Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.user",
+  "pk": 6,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$e3MzrlpblZ2w$1fhZY1O72uFLQM3sT51aOfgbxrahjVraKpeQORWB8z0=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "barna",
+    "email": "barna@gmail.com",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2019-01-16T09:13:07.584Z",
+    "updated_at": "2019-01-16T09:13:07.584Z",
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]

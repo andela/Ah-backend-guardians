@@ -190,4 +190,4 @@ class ResetPasswordConfirmSerializer(serializers.Serializer):
     Serializer Class For Confirming Change Of Password
     """
     password = serializers.CharField(max_length=128, min_length=8)
-    confirm_password = serializers.CharField(max_length=128, min_length=8)
+    confirm_password = serializers.CharField(max_length=128, min_length=8) 
