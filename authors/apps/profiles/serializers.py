@@ -1,4 +1,5 @@
 from rest_framework import serializers
+<<<<<<< HEAD
 from authors.apps.core.validation import ValidateRegistrationData
 
 from .models import Profile
@@ -8,10 +9,18 @@ class ProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for viewing a profile
     """
+=======
+
+from .models import Profile
+
+class ProfileSerializer(serializers.ModelSerializer):
+    """Serializer for creating a profile"""
+>>>>>>> feature(profiles): Users can create a profile
     email = serializers.CharField(source='user.email', read_only=True)
     first_name = serializers.CharField(allow_blank=True, required=False,
                                        min_length=2, max_length=50)
     last_name = serializers.CharField(allow_blank=True, required=False,
+<<<<<<< HEAD
                                       min_length=2, max_length=50)
     bio = serializers.CharField(allow_blank=True, required=False)
 
@@ -48,3 +57,13 @@ class EditProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ('bio', 'image', 'first_name', 'last_name')
+=======
+                                      min_length=2,max_length=50)
+    bio = serializers.CharField(allow_blank=True, required=False)
+    
+
+    class Meta:
+        model = Profile
+        fields = ( 'email','bio', 'image','first_name', 'last_name')
+        
+>>>>>>> feature(profiles): Users can create a profile

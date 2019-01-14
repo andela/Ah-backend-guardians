@@ -4,8 +4,6 @@ autopep8==1.4.3
 certifi==2018.11.29
 cffi==1.11.5
 chardet==3.0.4
-coreapi==2.3.3
-coreschema==0.0.4
 cloudinary==1.15.0
 coverage==4.5.2
 cryptography==2.4.2
@@ -32,8 +30,11 @@ mccabe==0.6.1
 mock==2.0.0
 nose==1.3.7
 oauthlib==3.0.0
+<<<<<<< HEAD
 openapi-codec==1.3.2
 pep8==1.7.1
+=======
+>>>>>>> feature(profiles): Users can create a profile
 pbr==5.1.1
 Pillow==5.4.1
 psycopg2==2.7.6.1
