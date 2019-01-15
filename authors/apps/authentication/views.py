@@ -14,6 +14,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 from .models import User
+import jwt
+from datetime import datetime, timedelta
+from django.conf import settings
 
 from .renderers import UserJSONRenderer
 from .serializers import (
@@ -29,15 +32,33 @@ class RegistrationAPIView(APIView):
     serializer_class = RegistrationSerializer
 
     def post(self, request):
-        user = request.data.get('user', {})
+        """Method to handle post request requests for user registration
 
-        # The create serializer, validate serializer, save serializer pattern
-        # below is common and you will see it a lot throughout this course and
-        # your own work later on. Get familiar with it.
+        :params:
+
+        request - this holds the request that a user is trying to send to the server.
+
+        :returns:
+
+        username: this holds the username that the user just registered.
+
+        email: this holds the email that the user just registered.
+
+        token: this holds the JWT that the user uses to access protected endpoints in the application.
+        """
+
+        user = request.data
+
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        user_token = User.generate_token(user)
+
+        response_data = {'username': user['username'], 'token': user_token}
+        response_data.update(serializer.data)
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class LoginAPIView(APIView):
@@ -46,7 +67,7 @@ class LoginAPIView(APIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
-        user = request.data.get('user', {})
+        user = request.data
 
         # Notice here that we do not call `serializer.save()` like we did for
         # the registration endpoint. This is because we don't actually have
@@ -55,7 +76,12 @@ class LoginAPIView(APIView):
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        user_token = User.generate_token(user)
+
+        response_data = {'username': user['email'], 'token': user_token}
+        response_data.update(serializer.data)
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
@@ -95,7 +121,7 @@ class ResetPasswordAPIView(GenericAPIView):
         return username
 
     def post(self, request):
-        user = request.data.get('user', {})
+        user = request.data
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
         user = User.objects.filter(email=user['email']).first()

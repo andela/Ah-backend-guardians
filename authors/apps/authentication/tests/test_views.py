@@ -9,7 +9,8 @@ from .base import BaseTestCase
 from ..models import User
 
 from .data import user_update, user1, user2, login_info, \
-     incorrect_email, userp, email, password, no_email
+     incorrect_email, userp, email, password, no_email, \
+     bad_login_info1, bad_login_info2
 
 
 class RegistrationLoginViewTestCase(BaseTestCase):
@@ -17,33 +18,57 @@ class RegistrationLoginViewTestCase(BaseTestCase):
     def test_register_new_user_correct_details(self):
         """Test api  can create user"""
         response = self.register_user(user1)
-        self.assertEqual(response.data['email'], user1['user']['email'])
+        self.assertEqual(response.data['email'], user1['email'])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_login_with_valid_credentials(self):
         """Test api can login user if user password and email match"""
         response = self.log_in_user(login_info)
 
-        self.assertEqual(response.data['username'], user2['user']['username'])
+        self.assertEqual(response.data['username'], user2['username'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_login_with_null_email(self):
+        """Test api can login user if user password and email match"""
+        response = self.log_in_user(bad_login_info1)
+        print(response.data)
+
+        self.assertEqual(response.data['errors']['email'], ['This field may not be null.'])
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_login_with_empty_email(self):
+        """Test api can login user if user password and email match"""
+        response = self.log_in_user(bad_login_info2)
+        print(response.data)
+
+        self.assertEqual(response.data['errors']['email'], ['This field may not be blank.'])
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_successfully_token_returned(self):
+        """Test a user gets back a JWT when they register succesfully"""
+        response = self.register_user(user1)
+
+        self.assertTrue(response.data['token'])
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
 class UserRetrieveUpdateViewTestCase(BaseTestCase):
     def setUp(self):
-        self.user = User.objects.get(username=user2['user']['username'])
+        self.user = User.objects.get(username=user2['username'])
         self.client.force_authenticate(user=self.user)
         self.url = reverse("authentication:detail")
 
     def test_get_user_credentials_when_authenticated(self):
         """Test api can get user if user is authenticated"""
         response = self.client.get(self.url)
-        self.assertEqual(response.data['username'], user2['user']['username'])
+        self.assertEqual(response.data['username'], user2['username'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_edit_user_credentials(self):
         """Test api can edit user data if user is authenticated"""
+        self.register_user(user1)
         response = self.client.put(self.url, user_update, format="json")
-        username = user_update['user']['username']
+        username = user_update['username']
         self.assertEqual(response.data['username'], username)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -76,6 +101,7 @@ class TestResetPassword(APITestCase):
         TestResetPassword.user_logged_in(self)
         res = self.client.post(
             '/api/password-reset/', email, format='json')
+        print(res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(
             json.loads(res.content),

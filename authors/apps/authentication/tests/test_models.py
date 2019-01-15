@@ -6,7 +6,7 @@ from .data import (
     user_data, user_data_no_username, user_data_no_email,
     super_user_data, super_user_data_no_password,
     super_user_data_no_username
-    )
+)
 
 
 class UserModelTestCase(TestCase):
