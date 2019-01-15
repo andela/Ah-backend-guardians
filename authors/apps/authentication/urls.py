@@ -6,7 +6,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from .views import (
     LoginAPIView, RegistrationAPIView, UserRetrieveUpdateAPIView,
-    ResetPasswordAPIView, ResetPasswordConfirmAPIView,
+    ResetPasswordAPIView, ResetPasswordConfirmAPIView, ActivateAccountView
 )
 
 schema_view = get_schema_view(
@@ -25,6 +25,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('user/', UserRetrieveUpdateAPIView.as_view(), name="detail"),
     path('users/', RegistrationAPIView.as_view(), name="register"),
+    path('users/<token>/<uid>/',
+         ActivateAccountView.as_view(), name="confirm"),
     path('users/login/', LoginAPIView.as_view(), name="login"),
     path('password-reset/', ResetPasswordAPIView.as_view()),
     path('password-reset-confirm/<slug>',

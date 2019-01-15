@@ -1,17 +1,18 @@
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.encoding import force_bytes, force_text
+from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.contrib.auth.hashers import make_password
+
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView
-
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.utils.encoding import force_bytes, force_text
-from django.contrib.sites.shortcuts import get_current_site
-from django.contrib.auth.hashers import make_password
-from django.core.mail import send_mail
-from django.conf import settings
+from rest_framework.generics import GenericAPIView, CreateAPIView
 
 from .models import User
 import jwt
@@ -23,6 +24,8 @@ from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer,
     ResetPasswordSerializer, ResetPasswordConfirmSerializer
 )
+
+from .models import User
 
 
 class RegistrationAPIView(GenericAPIView):
@@ -36,7 +39,8 @@ class RegistrationAPIView(GenericAPIView):
 
         :params:
 
-        request - this holds the request that a user is trying to send to the server.
+        request - this holds the request that a user is trying to send
+                  to the server.
 
         :returns:
 
@@ -44,21 +48,60 @@ class RegistrationAPIView(GenericAPIView):
 
         email: this holds the email that the user just registered.
 
-        token: this holds the JWT that the user uses to access protected endpoints in the application.
+        token: this holds the JWT that the user uses to access protected
+                endpoints in the application.
         """
 
         user = request.data
 
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        valid_user = serializer.save()
 
         user_token = User.generate_token(user)
-
-        response_data = {'username': user['username'], 'token': user_token}
-        response_data.update(serializer.data)
-
+        current_site = get_current_site(request)
+        response_data = self.send_notification(current_site,
+                                               valid_user, user_token)
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+    def send_notification(self, current_site, user, token):
+        domain = f'http://{current_site.domain}'
+        uid = urlsafe_base64_encode(force_bytes(user.username)).decode('utf-8')
+        route = reverse('authentication:confirm', args=[token, uid])
+        url = f'{domain}{route}'
+        subject = "Activate your Author's Haven Account."
+        message = f'Click Link Below To Activate Your Account\n{url}'
+        to_email = user.email
+        from_email = settings.EMAIL_HOST_USER
+        send_mail(subject, message, from_email,
+                  [to_email], fail_silently=False)
+        response_data = {
+            "msg": "Go to your email address to confirm registration",
+            "route": route,
+        }
+        return response_data
+
+
+class ActivateAccountView(CreateAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = UserSerializer
+
+    def get(self, request, token, uid):
+        try:
+            username = urlsafe_base64_decode(uid).decode('utf-8')
+            user = User.objects.filter(username=username).first()
+        except:
+            user = None
+        if user is not None and not user.email_verified and \
+                user.decode_token(token):
+            user.email_verified = True
+            user.save()
+            response_data = {
+                "msg": "Your account has been activated, congratulations",
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        error_msg = {"error": {"detail": 'Activation link is invalid!'}}
+        return Response(error_msg, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginAPIView(GenericAPIView):

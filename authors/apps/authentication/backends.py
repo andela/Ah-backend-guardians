@@ -27,7 +27,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
             prefix = auth_header[0].decode('utf-8')
             token = auth_header[1].decode('utf-8')
             if prefix.lower() != auth_header_prefix:
-                msg = 'Bearer is expected as the prefix '
+                msg = 'Bearer is expected as the prefix'
                 raise exceptions.AuthenticationFailed(msg)
             else:
                 return self._authenticate_credentiatials(request, token)
