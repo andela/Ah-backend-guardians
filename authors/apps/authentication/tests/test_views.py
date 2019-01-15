@@ -17,7 +17,7 @@ class RegistrationLoginViewTestCase(BaseTestCase):
     def test_register_new_user_correct_details(self):
         """Test api  can create user"""
         response = self.register_user(user1)
-        self.assertEqual(response.data['email'], user1['user']['email'])
+        self.assertEqual(response.data['email'], user1['email'])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_login_with_valid_credentials(self):
@@ -26,6 +26,13 @@ class RegistrationLoginViewTestCase(BaseTestCase):
 
         self.assertEqual(response.data['username'], user2['user']['username'])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_register_successfully_token_returned(self):
+        """Test a user gets back a JWT when they register succesfully"""
+        response = self.register_user(user1)
+
+        self.assertTrue(response.data['token'])
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
 class UserRetrieveUpdateViewTestCase(BaseTestCase):

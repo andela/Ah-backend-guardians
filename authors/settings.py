@@ -27,7 +27,8 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = True
 EMAIL_PORT = config('EMAIL_PORT')
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [
+                       s.strip() for s in v.split(',')])
 
 # Application definition
 
@@ -97,9 +98,9 @@ DATABASES = {
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
-   '--with-coverage',
-   '--cover-package=authors',
-   '--cover-tests',
+    '--with-coverage',
+    '--cover-package=authors',
+    '--cover-tests',
 ]
 
 # Password validation
@@ -148,15 +149,16 @@ CORS_ORIGIN_WHITELIST = (
 # the `authentication` module. This module is registered above in a setting
 # called `INSTALLED_APPS`.
 AUTH_USER_MODEL = 'authentication.User'
-#Activate Django-Heroku
+# Activate Django-Heroku
 django_heroku.settings(locals())
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'authors.apps.core.exceptions.core_exception_handler',
     'NON_FIELD_ERRORS_KEY': 'error',
-    # 'DEFAULT_AUTHENTICATION_CLASSES': (
-    #     'authors.apps.authentication.backends.JWTAuthentication',
-    # ),
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'authors.apps.authentication.backends.JWTAuthentication',
+    ),
 }
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
