@@ -53,14 +53,7 @@ class RegistrationAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        token_expiry = datetime.now() + timedelta(days=60)
-        token = jwt.encode({
-            'username': user['username'],
-            'exp': token_expiry.strftime('%s')},
-            key=settings.SECRET_KEY,
-            algorithm='HS256')
-
-        user_token = token.decode('utf-8')
+        user_token = User.generate_token(user)
 
         response_data = {'username': user['username'], 'token': user_token}
         response_data.update(serializer.data)
@@ -74,7 +67,7 @@ class LoginAPIView(APIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
-        user = request.data.get('user', {})
+        user = request.data
 
         # Notice here that we do not call `serializer.save()` like we did for
         # the registration endpoint. This is because we don't actually have
@@ -83,7 +76,12 @@ class LoginAPIView(APIView):
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        user_token = User.generate_token(user)
+
+        response_data = {'username': user['email'], 'token': user_token}
+        response_data.update(serializer.data)
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
@@ -123,7 +121,7 @@ class ResetPasswordAPIView(GenericAPIView):
         return username
 
     def post(self, request):
-        user = request.data.get('user', {})
+        user = request.data
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
         user = User.objects.filter(email=user['email']).first()

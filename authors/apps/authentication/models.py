@@ -117,3 +117,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         the user's real name, we return their username instead.
         """
         return self.username
+
+    @staticmethod
+    def generate_token(user):
+        token_expiry = datetime.now() + timedelta(days=60)
+        token = jwt.encode({
+            'username': user['email'],
+            'exp': token_expiry.strftime('%s')},
+            key=settings.SECRET_KEY,
+            algorithm='HS256')
+
+        user_token = token.decode('utf-8')
+
+        return user_token
