@@ -154,3 +154,31 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    """
+    Serializer Class For Requesting Change Of Password
+    """
+    email = serializers.EmailField(max_length=255)
+
+    def validate_email(self, email):
+        """
+        Method To Check Whether Entered Email Has
+        Corresponding Registered User
+        """
+        user = User.objects.filter(email=email).first()
+
+        if not user:
+            raise serializers.ValidationError(
+                'No User Found That Matches Entered Email'
+            )
+        return email
+
+
+class ResetPasswordConfirmSerializer(serializers.Serializer):
+    """
+    Serializer Class For Confirming Change Of Password
+    """
+    password = serializers.CharField(max_length=128, min_length=8)
+    confirm_password = serializers.CharField(max_length=128, min_length=8) 
