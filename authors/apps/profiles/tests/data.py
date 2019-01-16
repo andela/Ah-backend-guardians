@@ -10,3 +10,15 @@ user1 = {
     "password": "Password1"
 
 }
+
+follow_user = {
+    'username': user2['username']
+}
+
+follow_self = {
+    'username': user1['username']
+}
+
+follow_non_existent_user = {
+
+}

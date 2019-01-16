@@ -13,7 +13,7 @@ class ProfileJSONRenderer(JSONRenderer):
         # check for this case.
         # errors = data.get('errors', None)
 
-        if 'errors' in data or 'detail' in data or 'error' in data :
+        if 'errors' in data or 'detail' in data or 'error' in data:
             # As mentioned about, we will let the default JSONRenderer handle
             # rendering errors.
             return super().render(data)
