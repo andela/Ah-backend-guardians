@@ -8,18 +8,18 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from rest_framework import generics, status
-from .models import Article
+from .models import Article, Rating
 from authors import settings
 
 
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from .serializers import (
-    CreateArticleAPIViewSerializer
+    CreateArticleAPIViewSerializer, RatingSerializer
 )
 from authors.settings import RPD
 from ..authentication.models import User
-from .models import Article
+from .models import Article, Rating
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -42,7 +42,6 @@ class CreateArticleAPIView(generics.ListCreateAPIView):
         serializer.save(author=request.user)
 
         response = serializer.data
-
         response.update(article)
 
         return Response(response, status=status.HTTP_201_CREATED)
@@ -101,3 +100,25 @@ class RetrieveArticleAPIView(generics.RetrieveUpdateDestroyAPIView):
             {"message": "Article is deleted"},
             status=status.HTTP_200_OK
         )
+
+class CreateRatingsView(generics.CreateAPIView):
+    """
+    Class to handle the rating of articles
+    """
+    serializer_class = RatingSerializer
+    permission_classes = (IsAuthenticated, )
+    renderer_classes = (ArticleJSONRenderer, )
+
+    def post(self, request, slug=None):
+        """
+        Method that posts a rating for an article provided
+        It meets the correct criteria and if it does not, the appropriate
+        error message is returned
+        """
+        data = self.serializer_class.update_data(
+            request.data, slug, request.user)
+
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
