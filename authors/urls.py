@@ -26,4 +26,6 @@ urlpatterns = [
                           'profiles'), namespace='profiles')),
     path('api/', include(('authors.apps.articles.urls',
                           'article'), namespace='article')),
+    path('api/', include(('authors.apps.comments.urls',
+                         'comments'), namespace='comments')),
 ]
