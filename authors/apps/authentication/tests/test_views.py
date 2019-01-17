@@ -16,6 +16,8 @@ from .data import user_update, user1, user2, user3, verify_user1, login_info, \
 
 class RegistrationLoginViewTestCase(BaseTestCase):
 
+    fixtures = ['authors/apps/authentication/tests/fixtures/user.json']
+
     def test_verification_sent(self):
         response = self.register_user(user1)
         self.assertEqual(response.data['msg'], verify_user1['msg'])

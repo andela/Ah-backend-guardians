@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'authors.apps.authentication',
     'authors.apps.core',
     'authors.apps.profiles',
+    'authors.apps.articles',
 ]
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
@@ -73,6 +74,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'authors.urls'
+RPD = 120  # read per word
 
 TEMPLATES = [
     {
