@@ -37,7 +37,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
     def _authenticate_credentiatials(self, request, token):
         try:
             payload = jwt.decode(token, settings.SECRET_KEY)
-            user = User.objects.get(pk=payload['id'])
+            user = User.objects.get(email=payload['username'])
             if not user.is_active:
                 msg = 'This user has been deactivated'
                 raise exceptions.AuthenticationFailed(msg)
