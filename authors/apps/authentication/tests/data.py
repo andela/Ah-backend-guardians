@@ -39,16 +39,38 @@ user1 = {
     "email": "makabugo@andela.com",
     "password": "Simulman2101"
 }
+verify_user1 = {
+    "msg": "Go to your email address to confirm registration",
+    "route": "'/api/users/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.\
+            eyJ1c2VybmFtZSI6Im1ha2FidWdvQGFuZGVsYS5jb20iLCJleHAiOiIxNTUyODEyNTc3In0.\
+            jnTWF6LsEuqS6RtOFYXP4q61BzwCFOAhcUQa-TVnNAU/bWFrYWJ1Z28/'"
+}
 
 user2 = {
-    "username": "fahad12",
-    "email": "fahad.mak@andela.com",
-    "password": "andela13"
+    "username": "Greenday",
+    "email": "f.faraqhan@gmail.com",
+    "password": "Mkdons1233"
+}
+
+user3 = {
+    "username": "Greenday91234",
+    "email": "f.faraqhan91234@gmail.com",
+    "password": "Mkdons1239123"
 }
 
 login_info = {
-    "email": "fahad.mak@andela.com",
-    "password": "andela13"
+    "email": "f.faraqhan91234@gmail.com",
+    "password": "Mkdons12391234"
+}
+
+inactive_login_info = {
+    "email": "f.faraqhan9123@gmail.com",
+    "password": "Mkdons1239123"
+}
+
+logged_in_user2 = {
+    "username": "Greenday91234",
+    "token": "khkcdjgs53779379"
 }
 
 bad_login_info1 = {
@@ -62,9 +84,8 @@ bad_login_info2 = {
 }
 
 user_update = {
-    "username": "fahad12",
-    "email": "guardiansed.sims@andela.com",
-    "password": "Simulman2101"
+    "username": "Greenday91234",
+    "email": "guardiansed.sims@andela.com"
 }
 
 short_password = {
@@ -82,7 +103,6 @@ invalid_username = {
 
 }
 
-
 poor_conventions_password = {
 
     "username": "testuser",
@@ -96,9 +116,9 @@ incorrect_email = {
 }
 
 userp = {
-        'email': "moses@gmail.com",
-        'username': "mosesk",
-        'password': "Moses123"
+    'email': "moses@gmail.com",
+    'username': "mosesk",
+    'password': "Moses123"
 }
 
 email = {
@@ -112,6 +132,7 @@ password = {
 no_email = {
     "email": ""
 }
+
 short_username = {
 
     "username": "tes",
@@ -119,3 +140,15 @@ short_username = {
     "password": "Test@567"
 
 }
+
+inactive_account = {
+    "error": 'Please go to your email, to activate your account'
+}
+
+active_account = {
+    "email": "f.faraqhan91234@gmail.com",
+}
+
+decode_error = 'Invalid authentication. Could not decode token'
+
+prefix_error = 'Bearer is expected as the prefix'

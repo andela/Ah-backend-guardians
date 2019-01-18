@@ -93,6 +93,15 @@ class LoginSerializer(serializers.Serializer):
                 'This user has been deactivated.'
             )
 
+        # `email_verified` flag tells user to activate their account using
+        # email if they attempt to login without verifying their accounts
+        # using the link sent by Author's Haven app.
+        # Raise an exception in this case.
+        if not user.email_verified:
+            raise serializers.ValidationError(
+                'Please go to your email, to activate your account'
+            )
+
         # The `validate` method should return a dictionary of validated data.
         # This is the data that is passed to the `create` and `update` methods
         # that we will see later on.
@@ -181,4 +190,4 @@ class ResetPasswordConfirmSerializer(serializers.Serializer):
     Serializer Class For Confirming Change Of Password
     """
     password = serializers.CharField(max_length=128, min_length=8)
-    confirm_password = serializers.CharField(max_length=128, min_length=8) 
+    confirm_password = serializers.CharField(max_length=128, min_length=8)
