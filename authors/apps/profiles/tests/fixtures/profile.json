@@ -1,0 +1,41 @@
+[
+{
+  "model": "profiles.profile",
+  "pk": 1,
+  "fields": {
+    "user": 2,
+    "first_name": "Busulwa",
+    "last_name": "Busulwa",
+    "bio": "Im a great financial analyst",
+    "image": "",
+    "date_created": "2019-01-15T08:50:55.898Z",
+    "date_modified": "2019-01-16T12:18:27.807Z"
+  }
+},
+{
+  "model": "profiles.profile",
+  "pk": 2,
+  "fields": {
+    "user": 3,
+    "first_name": "Barna2",
+    "last_name": "Soulja",
+    "bio": "barnabas2388",
+    "image": "media/images/avatar/BMW-TA_dh9bhe",
+    "date_created": "2019-01-15T08:54:17.662Z",
+    "date_modified": "2019-01-16T11:48:25.618Z"
+  }
+},
+{
+  "model": "profiles.profile",
+  "pk": 3,
+  "fields": {
+    "user": 6,
+    "first_name": "",
+    "last_name": "",
+    "bio": "barnabas2",
+    "image": "",
+    "date_created": "2019-01-16T09:13:07.605Z",
+    "date_modified": "2019-01-16T10:15:40.774Z"
+  }
+}
+]
