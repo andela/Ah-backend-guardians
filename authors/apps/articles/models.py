@@ -6,6 +6,8 @@ from django.template.defaultfilters import slugify
 from django.utils.text import slugify
 from django.contrib.postgres.fields import ArrayField
 
+from django.conf import settings
+
 
 class Article(models.Model):
     """
@@ -24,12 +26,16 @@ class Article(models.Model):
     images = models.CharField(max_length=255, blank=True)
     read_time = models.PositiveSmallIntegerField(null=True)
     tags = ArrayField(models.CharField(max_length=255, unique=False,
-                      blank=True), unique=False, blank=True, default=list)
+                                       blank=True),
+                      unique=False, blank=True, default=list)
 
     objects = models.Manager()
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ["-created_at", "-updated_at"]
 
     def average_rating(self):
         """
@@ -40,6 +46,13 @@ class Article(models.Model):
 
     class Meta:
         ordering = ["-created_at", "-updated_at"]
+
+    def average_rating(self):
+        """
+        This function calculates the average rating of the reviewed article
+        """
+        ratings = self.article_ratings.all().aggregate(score=Avg("score"))
+        return float('%.2f' % (ratings["score"] if ratings['score'] else 0))
 
     def _get_unique_slug(self):
         slug = slugify(self.title)
@@ -70,16 +83,16 @@ class Article(models.Model):
         if not self.read_time:
             self.read_time = self.calculate_reading_time()
         super(Article, self).save(*args, **kwargs)
-        super().save(*args, **kwargs)
-
-    
 
 
 class Rating(models.Model):
     """
     Model for rating an article
     """
-    article = models.ForeignKey(Article, related_name='article_ratings',on_delete=models.CASCADE, null=True)
-    reader = models.ForeignKey(User, on_delete=models.CASCADE, related_name="article_ratings", null=True)
+    article = models.ForeignKey(
+        Article, related_name='article_ratings',
+        on_delete=models.CASCADE, null=True)
+    reader = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name="article_ratings", null=True)
     score = models.IntegerField(null=True)
-

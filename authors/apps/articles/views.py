@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.template.defaultfilters import slugify
 from .renderers import ArticleJSONRenderer, ArticlesJSONRenderer
 from rest_framework import status, exceptions
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ParseError
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from rest_framework import generics, status
@@ -19,7 +19,7 @@ from .serializers import (
 )
 from authors.settings import RPD
 from ..authentication.models import User
-from .models import Article, Rating
+from .models import Article
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -42,6 +42,7 @@ class CreateArticleAPIView(generics.ListCreateAPIView):
         serializer.save(author=request.user)
 
         response = serializer.data
+
         response.update(article)
 
         return Response(response, status=status.HTTP_201_CREATED)
@@ -101,22 +102,42 @@ class RetrieveArticleAPIView(generics.RetrieveUpdateDestroyAPIView):
             status=status.HTTP_200_OK
         )
 
-class CreateRatingsView(generics.CreateAPIView):
+
+class CreateRatingsView(generics.UpdateAPIView):
     """
     Class to handle the rating of articles
     """
     serializer_class = RatingSerializer
     permission_classes = (IsAuthenticated, )
-    renderer_classes = (ArticleJSONRenderer, )
+    renderer_classes = (ArticleJSONRenderer,)
 
-    def post(self, request, slug=None):
+    def get_queryset(self, data, user, slug):
         """
-        Method that posts a rating for an article provided
-        It meets the correct criteria and if it does not, the appropriate
+        Method to get the article slug and compare it with
+        available slugs in the database. It shall also handle all
+        permissions in relation to rating an article
+        """
+        article = get_object_or_404(Article, slug=slug)
+        if article.author == self.request.user:
+            raise PermissionDenied({"error":
+                                    "You cannot rate an article you created"})
+        if Rating.objects.filter(
+                reader=user.pk).filter(article=article.id).exists():
+            raise ParseError({"error": "You already rated this article"})
+
+        data.update({"article": article.pk})
+        data.update({"reader": user.pk})
+        return data
+
+    def put(self, request, slug=None):
+        """
+        Method that edit a rating for an article provided, check whether
+        it meets the correct criteria and if it does not, the appropriate
         error message is returned
         """
-        data = self.serializer_class.update_data(
-            request.data, slug, request.user)
+
+        data = self.get_queryset(
+            request.data, request.user, slug)
 
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)

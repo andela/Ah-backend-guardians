@@ -60,10 +60,17 @@ user3 = {
     "password": "Mkdons1239123"
 }
 
+user4 = {
+    "username": "myrdstom",
+    "email": "nserekopaul@gmail.com",
+    "password": "Password1"
+}
+
 login_info = {
     "email": "f.faraqhan91234@gmail.com",
     "password": "Mkdons12391234"
 }
+
 
 inactive_login_info = {
     "email": "f.faraqhan9123@gmail.com",
