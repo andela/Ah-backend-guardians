@@ -58,3 +58,13 @@ class UpdateProfileView(generics.UpdateAPIView):
                 'error':  exception_messages.get
                 ('edit_profile_not_permitted').format(username)
             })
+
+
+class ListProfileView(generics.ListAPIView):
+    """
+    Implements get all user profile endpoint
+    """
+    permission_classes = (IsAuthenticated, )
+    renderer_classes = (ProfileJSONRenderer,)
+    serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()

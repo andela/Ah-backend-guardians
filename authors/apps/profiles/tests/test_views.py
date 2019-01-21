@@ -44,7 +44,6 @@ class RetrieveProfileTestCase(BaseTestCase):
 
 class EditProfileTestCase(BaseTestCase):
     def setUp(self):
-
         username1 = user1['username']
         username2 = user2['username']
         self.user = User.objects.get(username=username2)
@@ -57,7 +56,22 @@ class EditProfileTestCase(BaseTestCase):
         """
         self.client.force_authenticate(user=self.user)
         response = self.client.put(self.url1)
-        print(response.data)
         self.assertEqual(response.data['error'],
                          "You are not authorised to edit soultek's profile")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class ListProfileTestCase(BaseTestCase):
+    def setUp(self):
+        username1 = user1['username']
+        username2 = user2['username']
+        self.user = User.objects.get(username=username2)
+
+    def test_get_all_user_profiles(self):
+        """
+        Test whether a user can get all profiles
+        """
+        url = reverse("profiles:show_profile")
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
