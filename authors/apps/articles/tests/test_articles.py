@@ -4,9 +4,11 @@ from rest_framework.utils.serializer_helpers import OrderedDict
 from rest_framework.test import APITestCase, APIClient
 from authors.apps.authentication.tests.base import BaseTestCase
 from django.urls import reverse
+from django.conf import settings
 
 from authors.apps.authentication.tests.data import login_info
 from ..models import Article
+from .data import article_body
 from authors.apps.authentication.models import User
 from rest_framework.test import (
     APITestCase,
@@ -53,6 +55,7 @@ class TestArticle(BaseTestCase):
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_create_models_article(self):
+        """Test if the article has a read time"""
         user = User.objects.create_user(
             username='moses', email='moses@gmail.com',
             password='Kamira123')
@@ -62,6 +65,19 @@ class TestArticle(BaseTestCase):
         article = Article.objects.create(
             title='article title', author=author)
         self.assertEqual(str(article), article.title)
+
+    def test_check_read_time(self):
+        user = User.objects.create_user(
+            username='moses', email='moses@gmail.com',
+            password='Kamira123')
+        user.is_verified = True
+        user = User.objects.filter(email='moses@gmail.com').first()
+        author = user
+        article = Article.objects.create(
+            title='article title', body=article_body, author=author)
+        number_of_words = Article.count_words(article.body)
+        reading_time = int(number_of_words/settings.WPM)
+        self.assertEqual(article.read_time, reading_time)
 
     def test_create_article(self):
         self.client.credentials(

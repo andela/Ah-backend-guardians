@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from ..authentication.models import User
 from django.template.defaultfilters import slugify
 from django.utils.text import slugify
+from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 
 
@@ -21,6 +22,7 @@ class Article(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     images = models.CharField(max_length=255, blank=True)
+    read_time = models.PositiveSmallIntegerField(null=True)
 
     objects = models.Manager()
 
@@ -39,7 +41,23 @@ class Article(models.Model):
             num += 1
         return unique_slug
 
+    @staticmethod
+    def count_words(article_body):
+        total_words = 0
+        for word in article_body:
+            total_words += len(word)/settings.WORD_LENGTH
+        return total_words
+
+    def calculate_reading_time(self):
+        """
+        Method that calculates the reading time of an article
+        """
+        total_words = Article.count_words(self.body)
+        return int(total_words/settings.WPM)
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = self._get_unique_slug()
-        super().save(*args, **kwargs)
+        if not self.read_time:
+            self.read_time = self.calculate_reading_time()
+        super(Article, self).save(*args, **kwargs)
