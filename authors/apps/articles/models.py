@@ -23,6 +23,8 @@ class Article(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     images = models.CharField(max_length=255, blank=True)
     read_time = models.PositiveSmallIntegerField(null=True)
+    tags = ArrayField(models.CharField(max_length=255, unique=False,
+                      blank=True), unique=False, blank=True, default=list)
 
     objects = models.Manager()
 

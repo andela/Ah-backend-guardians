@@ -13,7 +13,7 @@ class CreateArticleAPIViewSerializer(serializers.ModelSerializer):
         model = Article
         fields = ('id', 'title', 'body', 'description',
                   'author', 'slug', 'published', 'created_at',
-                  'updated_at', 'images', 'read_time')
+                  'updated_at', 'images', 'read_time', 'tags')
 
     def validate_title(self, value):
         if len(value) > 255:
