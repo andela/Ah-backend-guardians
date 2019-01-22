@@ -115,3 +115,4 @@ class TestArticle(BaseTestCase):
         res = self.client.delete(
             self.url+slug+'/',  format='json')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
