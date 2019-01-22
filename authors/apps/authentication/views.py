@@ -14,6 +14,25 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, CreateAPIView
 
+from social_django.utils import load_backend, load_strategy
+from social.exceptions import AuthAlreadyAssociated
+from social_core.exceptions import MissingBackend
+import facebook
+import os
+import uuid
+import twitter
+from google.oauth2 import id_token
+from google.auth.transport import requests
+# from django.template.defaultfilters import slugify
+
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes, force_text
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth.hashers import make_password
+from django.core.mail import send_mail
+from django.conf import settings
+
 from .models import User
 import jwt
 from datetime import datetime, timedelta
@@ -22,7 +41,8 @@ from django.conf import settings
 from .renderers import UserJSONRenderer
 from .serializers import (
     LoginSerializer, RegistrationSerializer, UserSerializer,
-    ResetPasswordSerializer, ResetPasswordConfirmSerializer
+    ResetPasswordSerializer, ResetPasswordConfirmSerializer,
+    SocialAuthenticationSerializer
 )
 
 from .models import User
@@ -221,3 +241,165 @@ class ResetPasswordConfirmAPIView(RetrieveUpdateAPIView):
                 ]
             }
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FacebookAPIView(CreateAPIView):
+
+    permission_classes = (AllowAny,)
+    serializer_class = SocialAuthenticationSerializer
+    renderer_classes = (UserJSONRenderer,)
+
+    def create(self, request, *args, **kwargs):
+
+        serializer = self.serializer_class(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        access_token = serializer.data.get('access_token')
+
+        try:
+            """ Get user information from access token"""
+            fb_user = facebook.GraphAPI(access_token=access_token)
+            user_info = fb_user.get_object(
+                id='me',
+                fields='name, id, email')
+        except:
+            return Response({
+                "error": "This token is invalid or expired"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            """ User authentication using email address """
+            user = User.objects.get(email=user_info.get('email'))
+            user_dict = {
+                "email": user.email,
+            }
+            token = user.generate_token(user_dict)
+            password = User.objects.make_random_password()
+            return Response({
+                'email': user.email,
+                'username': user.username,
+                'token': token
+            }, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            """ Create user if doesn't exist """
+            user_dict = {
+                "email": user_info.get('email')}
+            password = User.objects.make_random_password()
+            user = User(
+                username=user_info.get('name')+str(uuid.uuid1().int)[:3],
+                email=user_info.get('email'),
+                is_active=1,
+            )
+            user.set_password(password)
+            user.save()
+            return Response({
+                'email': user.email,
+                'username': user.username,
+                'token': user.generate_token(user_dict)
+            }, status=status.HTTP_201_CREATED)
+
+
+class GoogleAPIView(CreateAPIView):
+    permission_classes = (AllowAny,)
+    renderer_classes = (UserJSONRenderer,)
+    serializer_class = SocialAuthenticationSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        access_token = serializer.data.get('access_token')
+
+        try:
+            """ Get user information from token"""
+            user_info = id_token.verify_oauth2_token(
+                access_token, requests.Request())
+
+        except:
+            return Response({
+                "error": "Token-Id is invalid or expired"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            """ User authentication using email address if exists"""
+            user = User.objects.get(email=user_info.get('email'))
+            user_dict = {
+                "email": user.email,
+            }
+            return Response({
+                'email': user.email,
+                'username': user.username,
+                'token': user.generate_token(user_dict)
+            }, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            """ Create user if doesn't exist """
+            user_dict = {
+                "email": user_info.get('email')}
+            password = User.objects.make_random_password()
+            user = User(
+                username=user_info.get('name')+"-"+str(uuid.uuid1().int)[:3],
+                email=user_info.get('email'),
+                is_active=1
+            )
+            user.set_password(password)
+            user.save()
+            return Response({
+                'email': user.email,
+                'username': user.username,
+                'token': user.generate_token(user_dict)
+            }, status=status.HTTP_201_CREATED)
+
+class TwitterAPIView(CreateAPIView):
+    permission_classes = (AllowAny,)
+    renderer_classes = (UserJSONRenderer,)
+    serializer_class = SocialAuthenticationSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        access_token_key = request.data.get('access_token')
+        access_token_secret = request.data.get('access_token_secret')
+        try:
+            consumer_key = settings.TWITTER_CONSUMER_KEY
+            consumer_secret = settings.TWITTER_CONSUMER_SECRET
+            api = twitter.Api(
+                consumer_key=consumer_key,
+                consumer_secret=consumer_secret,
+                access_token_key=access_token_key,
+                access_token_secret=access_token_secret
+            )
+            user_info = api.VerifyCredentials(include_email=True)
+            user_info = user_info.__dict__
+        except:
+            return Response({
+                "error": "This token is invalid or expired"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            """ User authentication using email address """
+            user = User.objects.get(email=user_info.get('email'))
+            user_dict = {
+                "email": user.email,
+            }
+            return Response({
+                'email': user.email,
+                'username': user.username,
+                'token': user.generate_token(user_dict)
+            }, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            """ Create user if doesn't exist """
+            password = User.objects.make_random_password()
+            user_dict = {
+                "email": user_info.get('email')}
+            user = User(
+                username=user_info.get('name')+"-"+str(uuid.uuid1().int)[:3],
+                email=user_info.get('email'),
+                is_active=1,
+            )
+            user.set_password(password)
+            user.save()
+            return Response({
+                'email': user.email,
+                'username': user.username,
+                'token': user.generate_token(user_dict)
+            }, status=status.HTTP_201_CREATED)

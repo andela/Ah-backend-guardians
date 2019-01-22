@@ -1,3 +1,5 @@
+from django.conf import settings
+
 # test data for test_model.py
 user_data = {
     "username": "test",
@@ -152,3 +154,23 @@ active_account = {
 decode_error = 'Invalid authentication. Could not decode token'
 
 prefix_error = 'Bearer is expected as the prefix'
+
+# Test Data for Social Login
+
+wrong_fb_token = {
+    "access_token": "wrong_fb_token"
+}
+
+fb_token = {
+    'access_token':"correct_access_token"
+}
+
+google_token = {
+    "access_token": "google_token"
+}
+
+twitter_token = {
+	"access_token": "access_token",
+	"access_token_secret": "access_token_secret"
+}
+

@@ -6,7 +6,6 @@ from authors.apps.core.validation import ValidateRegistrationData
 
 from .models import User
 
-
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializers registration requests and creates a new user."""
 
@@ -190,4 +189,12 @@ class ResetPasswordConfirmSerializer(serializers.Serializer):
     Serializer Class For Confirming Change Of Password
     """
     password = serializers.CharField(max_length=128, min_length=8)
-    confirm_password = serializers.CharField(max_length=128, min_length=8) 
+    confirm_password = serializers.CharField(max_length=128, min_length=8)
+
+
+class SocialAuthenticationSerializer(serializers.Serializer):
+    """
+    Serializer class for social authentication requests
+    """
+    access_token = serializers.CharField(
+        max_length=2500, required=True, trim_whitespace=True)
