@@ -19,7 +19,6 @@ class ValidationTest(BaseTestCase):
         """Test api  can't create user if password is invalid"""
 
         response = self.register_user(poor_conventions_password)
-        print(response.data['errors'])
 
         self.assertEqual(response.data['errors']['error'],
                          ["Ensure password has an uppercase, lowercase, "
