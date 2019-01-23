@@ -19,7 +19,6 @@ from django.contrib import admin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
     path('api/', include(('authors.apps.authentication.urls',
                           'authentication'), namespace='authentication')),
     path('api/', include(('authors.apps.profiles.urls',
@@ -28,4 +27,5 @@ urlpatterns = [
                           'article'), namespace='article')),
     path('api/', include(('authors.apps.comments.urls',
                          'comments'), namespace='comments')),
+    path('api/auth/login/', include('rest_social_auth.urls_token')),
 ]

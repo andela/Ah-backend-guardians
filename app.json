@@ -40,7 +40,14 @@
         },
         "API_SECRET": {
             "required": true
+        },
+        "TWITTER_CONSUMER_KEY": {
+            "required": true
+        },
+        "TWITTER_CONSUMER_SECRET": {
+            "required": true
         }
+
 
     },
     "formation": {},

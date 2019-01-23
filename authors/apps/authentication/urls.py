@@ -6,7 +6,8 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from .views import (
     LoginAPIView, RegistrationAPIView, UserRetrieveUpdateAPIView,
-    ResetPasswordAPIView, ResetPasswordConfirmAPIView, ActivateAccountView
+    ResetPasswordAPIView, ResetPasswordConfirmAPIView, ActivateAccountView, 
+    FacebookAPIView, GoogleAPIView, TwitterAPIView
 )
 
 schema_view = get_schema_view(
@@ -31,7 +32,11 @@ urlpatterns = [
     path('password-reset/', ResetPasswordAPIView.as_view()),
     path('password-reset-confirm/<slug>',
          ResetPasswordConfirmAPIView.as_view()),
+
     path('swagger/', schema_view.with_ui('swagger',
                                          cache_timeout=0),
          name='schema-swagger-ui'),
+    path('users/facebook/', FacebookAPIView.as_view(), name="fb_login"),
+    path('users/google/', GoogleAPIView.as_view(), name="google_login"),
+    path('users/twitter/', TwitterAPIView.as_view(), name="twitter_login"),
 ]

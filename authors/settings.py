@@ -53,7 +53,10 @@ INSTALLED_APPS = [
     'authors.apps.profiles',
     'authors.apps.articles',
     'authors.apps.comments',
+    'rest_social_auth',
+
 ]
+
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'api_key': {
@@ -63,6 +66,7 @@ SWAGGER_SETTINGS = {
         }
     },
 }
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -194,3 +198,6 @@ EMAIL_PORT = config('EMAIL_PORT')
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+TWITTER_CONSUMER_KEY = config('TWITTER_CONSUMER_KEY')
+TWITTER_CONSUMER_SECRET = config('TWITTER_CONSUMER_SECRET')
