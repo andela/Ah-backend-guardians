@@ -26,8 +26,10 @@ class Article(models.Model):
     images = models.CharField(max_length=255, blank=True)
     read_time = models.PositiveSmallIntegerField(null=True)
     tags = ArrayField(models.CharField(max_length=255, unique=False,
-                                       blank=True),
-                      unique=False, blank=True, default=list)
+                                       blank=True), unique=False, blank=True,
+                      default=list)
+    favourited = models.BooleanField(blank=True, default=False)
+    favouriteCount = models.IntegerField(blank=True, default=0)
 
     objects = models.Manager()
 
@@ -115,6 +117,7 @@ class Article(models.Model):
             self.read_time = self.calculate_reading_time()
         super(Article, self).save(*args, **kwargs)
 
+
 class Rating(models.Model):
     """
     Model for rating an article
@@ -148,3 +151,12 @@ class ArticleDisLikes(models.Model):
         Article, on_delete=models.CASCADE, null=True, blank=True)
     article_dislike = models.BooleanField(null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+class Favourites(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    article = models.ForeignKey(
+        Article, related_name="article_id",
+        on_delete=models.CASCADE, null=True)
+    favourite = models.BooleanField(default=False)
