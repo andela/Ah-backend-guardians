@@ -1,0 +1,56 @@
+[
+{
+  "model": "authentication.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$9hG7KMpv1rLI$yquVMNRxDfC0m3SDtuSIIkpmE7KnfVt2DIFLAbZBq2w=",
+    "last_login": "2019-01-21T09:49:14.961Z",
+    "is_superuser": true,
+    "username": "admin",
+    "email": "emmanuel.omona@andela.com",
+    "is_active": true,
+    "is_staff": true,
+    "created_at": "2019-01-21T09:47:42.747Z",
+    "updated_at": "2019-01-21T09:47:42.750Z",
+    "email_verified": true,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$Xas0ZaHLmJz7$6EbbWAE9CkaVpVSEU6US9fEQNKNTl0hwKhoR9aXNIE8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "Emma1234",
+    "email": "emmanuelomona1@gmail.com",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2019-01-21T09:48:41.390Z",
+    "updated_at": "2019-01-21T09:48:41.390Z",
+    "email_verified": true,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$t0EBMEMRjYxm$sc3JbuBR+tqhNEP92quNLiiRDdJU5JWi05hM5KVuVgA=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "Omona123",
+    "email": "omona@gmail.com",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2019-01-21T09:48:41.390Z",
+    "updated_at": "2019-01-21T09:48:41.390Z",
+    "email_verified": true,
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]

@@ -1,0 +1,50 @@
+[
+{
+  "model": "comments.comment",
+  "pk": 1,
+  "fields": {
+    "author": 1,
+    "article": 1,
+    "parent": null,
+    "body": "Thanks for your post, it has taught me how to code",
+    "created_at": "2019-01-21T09:59:34.657Z",
+    "updated_at": "2019-01-21T09:59:34.657Z"
+  }
+},
+{
+  "model": "comments.comment",
+  "pk": 2,
+  "fields": {
+    "author": 2,
+    "article": 1,
+    "parent": 1,
+    "body": "Your welcome",
+    "created_at": "2019-01-21T10:28:44.030Z",
+    "updated_at": "2019-01-21T10:28:44.030Z"
+  }
+},
+{
+  "model": "comments.comment",
+  "pk": 15,
+  "fields": {
+    "author": 1,
+    "article": 1,
+    "parent": null,
+    "body": "So inspiring",
+    "created_at": "2019-01-21T11:40:45.729Z",
+    "updated_at": "2019-01-21T11:40:45.729Z"
+  }
+},
+{
+  "model": "comments.comment",
+  "pk": 16,
+  "fields": {
+    "author": 1,
+    "article": 1,
+    "parent": null,
+    "body": "So Cool",
+    "created_at": "2019-01-21T11:42:45.886Z",
+    "updated_at": "2019-01-21T11:42:45.886Z"
+  }
+}
+]
