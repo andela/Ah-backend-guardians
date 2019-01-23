@@ -46,9 +46,14 @@
         },
         "TWITTER_CONSUMER_SECRET": {
             "required": true
+        },
+        "WORD_LENGTH": {
+            "required": true
+        },
+        "WPM": {
+            "required": true
         }
-
-
+        
     },
     "formation": {},
     "addons": [
