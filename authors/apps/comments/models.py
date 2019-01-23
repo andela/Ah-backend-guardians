@@ -16,3 +16,12 @@ class Comment(models.Model):
 
     def __str__(self):
         return str(self.author)
+
+
+class LikeComment(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.user)

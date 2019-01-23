@@ -1,5 +1,7 @@
 from django.urls import path
-from .views import CreateCommentAPiView, CommentApiView, CommentThreadApiView
+from .views import (CreateCommentAPiView, CommentApiView,
+                    CommentThreadApiView, LikeCommentApiView,
+                    GetCommentApiView)
 
 
 urlpatterns = [
@@ -12,4 +14,10 @@ urlpatterns = [
     path('<slug>/comments/<int:id>/thread/',
          CommentThreadApiView.as_view(),
          name='comment_thread'),
+    path('<slug>/comments/<int:id>/likes/',
+         LikeCommentApiView.as_view(),
+         name='like_comment'),
+    path('<slug>/comments/<int:id>/likes/<pk>/',
+         GetCommentApiView.as_view(),
+         name='retrieve_comment'),
 ]

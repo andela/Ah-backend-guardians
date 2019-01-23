@@ -5,8 +5,10 @@ from rest_framework.permissions import IsAuthenticated
 
 from . import serializers
 from .utils import Utils
-from .models import Comment
+from .models import Comment, LikeComment
+from .renderers import LikeComementsJSONRenderer
 from authors.apps.articles.models import Article
+from rest_framework.generics import get_object_or_404
 
 
 class CreateCommentAPiView(generics.ListCreateAPIView):
@@ -96,6 +98,7 @@ class CommentApiView(generics.RetrieveUpdateDestroyAPIView):
 class CommentThreadApiView(generics.ListCreateAPIView):
 
     queryset = Comment.objects.all()
+    permission_classes = (IsAuthenticated,)
     serializer_class = serializers.CommentSerializer
     util = Utils()
 
@@ -125,3 +128,49 @@ class CommentThreadApiView(generics.ListCreateAPIView):
         serializer = self.serializer_class(thread, many=True)
         return Response({"comments": serializer.data,
                          "thread count": thread.count()})
+
+
+class LikeCommentApiView(generics.RetrieveUpdateAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.LikeCommentSerializer
+    renderer_classes = (LikeComementsJSONRenderer, )
+
+    def get_queryset(self):
+        return LikeComment.objects.all()
+
+    def get_object(self):
+        id = self.kwargs.get('id')
+        return get_object_or_404(Comment.objects.all(), id=id)
+
+    def retrieve(self, request, *args, **kwargs):
+        likes = self.get_queryset()
+        serializer = self.serializer_class(data=likes, many=True)
+        serializer.is_valid()
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        comment = self.get_object()
+        data = {
+            'comment': comment.id,
+            'user': request.user.pk
+        }
+
+        like = self.get_queryset().filter(comment=comment.id,
+                                          user=request.user.pk)
+        if like:
+            like.delete()
+            return Response({"message": "You have unliked this comment"},
+                            status.HTTP_200_OK)
+        serializer = self.serializer_class(data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "You have liked this comment"},
+                        status.HTTP_201_CREATED)
+
+
+class GetCommentApiView(generics.RetrieveAPIView):
+
+    permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.LikeCommentSerializer
+    queryset = LikeComment.objects.all()

@@ -1,0 +1,10 @@
+[
+{
+  "model": "comments.likecomment",
+  "pk": 1,
+  "fields": {
+    "comment": 1,
+    "user": 2
+  }
+}
+]
