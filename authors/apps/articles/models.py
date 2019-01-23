@@ -5,6 +5,27 @@ from django.template.defaultfilters import slugify
 from django.utils.text import slugify
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
+from .utils import get_likes_or_dislikes
+
+
+class ArticleManager(models.Manager):
+    def toggle_like(self, request_user, slug):
+        try:
+            article_slug = Article.objects.filter(
+                slug=slug).values('slug')[0]['slug']
+            print(article_slug)
+            article = Article.objects.get(slug=article_slug)
+
+            like_status = False
+
+            if request_user in article.likes.all():
+                article.likes.remove(request_user)
+            else:
+                article.likes.add(request_user)
+                like_status = True
+            return like_status
+        except IndexError:
+            return None
 
 
 class Article(models.Model):
@@ -26,10 +47,24 @@ class Article(models.Model):
     tags = ArrayField(models.CharField(max_length=255, unique=False,
                       blank=True), unique=False, blank=True, default=list)
 
-    objects = models.Manager()
+    objects = ArticleManager()
 
     def __str__(self):
         return self.title
+
+    @property
+    def likes_count(self):
+        return get_likes_or_dislikes(
+            model=ArticleLikes,
+            like_article=True,
+            article_id=self.pk)
+
+    @property
+    def dislikes_count(self):
+        return get_likes_or_dislikes(
+            model=ArticleLikes,
+            like_article=False,
+            article_id=self.pk)
 
     class Meta:
         ordering = ["-created_at", "-updated_at"]
@@ -63,3 +98,13 @@ class Article(models.Model):
         if not self.read_time:
             self.read_time = self.calculate_reading_time()
         super(Article, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
+
+
+class ArticleLikes(models.Model):
+
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, null=True, blank=True,
+        related_name='article_likes')
+    article_like = models.BooleanField(null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)

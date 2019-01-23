@@ -115,3 +115,39 @@ class TestArticle(BaseTestCase):
         res = self.client.delete(
             self.url+slug+'/',  format='json')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_like_article_doesnot_exist(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = "vivian-cohort"
+        like_url = reverse("article:like_article", args=[slug])
+        get_response = self.client.put(like_url, format='json')
+        self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_like_article_that_exist(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+        like_url = reverse("article:like_article", args=[slug])
+        get_response = self.client.put(like_url, format='json')
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(get_response.data['message'], 'liked')
+
+    def test_dislike_article_that_exist(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+        like_url = reverse("article:like_article", args=[slug])
+        get_response = self.client.put(like_url, format='json')
+        get_response_2 = self.client.put(like_url, format='json')
+        self.assertEqual(get_response_2.status_code, status.HTTP_200_OK)
+        self.assertEqual(get_response_2.data['message'], 'disliked')

@@ -8,19 +8,20 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from rest_framework import generics, status
-from .models import Article
+from .models import Article, ArticleLikes
 from authors import settings
 
 
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from .serializers import (
-    CreateArticleAPIViewSerializer
+    CreateArticleAPIViewSerializer, LikeArticleAPIViewSerializer
 )
 from authors.settings import RPD
 from ..authentication.models import User
 from .models import Article
 from rest_framework import generics
+from ..authentication.backends import JWTAuthentication
 
 
 class CreateArticleAPIView(generics.ListCreateAPIView):
@@ -97,3 +98,37 @@ class RetrieveArticleAPIView(generics.RetrieveUpdateDestroyAPIView):
             {"message": "Article is deleted"},
             status=status.HTTP_200_OK
         )
+
+
+class LikeArticleAPIView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (ArticleJSONRenderer,)
+    serializer_class = LikeArticleAPIViewSerializer
+    queryset = ArticleLikes.objects.all()
+
+    def put(self, request, slug):
+        user = request.user
+        try:
+            article = Article.objects.all().filter(slug=slug).first()
+            liked_article = self.queryset.filter(
+                article=article, user=user).first()
+            if liked_article.article_like is True:
+                liked_article.article_like = False
+                liked_article.save()
+                return Response({"message": "disliked"},
+                                status=status.HTTP_200_OK)
+            liked_article.article_like = True
+            liked_article.save()
+            return Response({"message": "liked"},
+                            status=status.HTTP_200_OK)
+        except:
+            if article is not None:
+                article_likes = ArticleLikes.objects.create(
+                    article=article, user=user, article_like=True)
+                article_likes.save()
+                return Response({"message": "liked"},
+                                status=status.HTTP_200_OK)
+            response = {
+                'error': 'You can not like an article that does not exist'
+            }
+            return Response(response, status.HTTP_404_NOT_FOUND)
