@@ -29,3 +29,13 @@ class ArticlesJSONRenderer(JSONRenderer):
         return json.dumps({
             'articles': data
         })
+
+
+class ArticlesLikesJSONRenderer(JSONRenderer):
+    charset = 'utf-8'
+
+    def render(self, data, media_type=None, renderer_context=None):
+
+        return json.dumps({
+            'article_status': data
+        })

@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from ..authentication.serializers import UserSerializer
-from .models import Article, Rating
+from .models import Article, Rating, ArticleLikes, ArticleDisLikes
 from ..authentication.models import User
 
 
@@ -18,7 +18,7 @@ class CreateArticleAPIViewSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'body', 'description',
                   'author', 'slug', 'published', 'created_at',
                   'updated_at', 'images', 'read_time', 'tags',
-                  'average_rating', 'social_links')
+                  'average_rating', 'social_links', 'likes_count', 'dislikes_count')
 
     def validate_title(self, value):
         if len(value) > 255:
@@ -69,3 +69,23 @@ class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
         fields = ("score", "article", "reader")
+
+
+class LikeArticleSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for liking an article model
+    """
+    class Meta:
+        model = ArticleLikes
+        fields = ("article_like", )
+
+
+class DisLikeArticleSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for liking an article model
+    """
+    class Meta:
+        model = ArticleDisLikes
+        fields = ("article_dislike", )

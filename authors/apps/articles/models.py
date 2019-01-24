@@ -44,15 +44,46 @@ class Article(models.Model):
         ratings = self.article_ratings.all().aggregate(score=Avg("score"))
         return float('%.2f' % (ratings["score"] if ratings['score'] else 0))
 
-    class Meta:
-        ordering = ["-created_at", "-updated_at"]
+    def get_likes(self, **kwargs):
+        """
+        This method counts article likes
+        params: dictionary
+        return:number of likes
+        """
+        likes = kwargs.get('model').objects.all().filter(
+            article_like=kwargs.get('like_article')
+        )
+        filtered_likes = likes.filter(article_id=kwargs.get('article_id'))
+        return filtered_likes.count()
 
-    def average_rating(self):
+    def get_dislikes(self, **kwargs):
         """
-        This function calculates the average rating of the reviewed article
+        This method counts article dislikes
+        params: dictionary
+        return:number of dislikes
         """
-        ratings = self.article_ratings.all().aggregate(score=Avg("score"))
-        return float('%.2f' % (ratings["score"] if ratings['score'] else 0))
+        dislikes = kwargs.get('model').objects.all().filter(
+            article_dislike=kwargs.get('dislike_article')
+        )
+        filtered_dislikes = dislikes.filter(
+            article_id=kwargs.get('article_id'))
+        return filtered_dislikes.count()
+
+    @property
+    def likes_count(self):
+        """return count of liked article"""
+        return self.get_likes(
+            model=ArticleLikes,
+            like_article=True,
+            article_id=self.pk)
+
+    @property
+    def dislikes_count(self):
+        """return count of unliked article"""
+        return self. get_dislikes(
+            model=ArticleDisLikes,
+            dislike_article=True,
+            article_id=self.pk)
 
     def _get_unique_slug(self):
         slug = slugify(self.title)
@@ -84,7 +115,6 @@ class Article(models.Model):
             self.read_time = self.calculate_reading_time()
         super(Article, self).save(*args, **kwargs)
 
-
 class Rating(models.Model):
     """
     Model for rating an article
@@ -96,3 +126,25 @@ class Rating(models.Model):
         User, on_delete=models.CASCADE,
         related_name="article_ratings", null=True)
     score = models.IntegerField(null=True)
+
+
+class ArticleLikes(models.Model):
+    """
+    Class Implementing The Article Likes Model.
+    """
+
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, null=True, blank=True,
+        related_name='article_likes')
+    article_like = models.BooleanField(null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+class ArticleDisLikes(models.Model):
+    """
+    Class Implementing The Article Likes Model.
+    """
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, null=True, blank=True)
+    article_dislike = models.BooleanField(null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
