@@ -37,7 +37,8 @@ class CreateArticleAPIView(generics.ListCreateAPIView):
         """ Method For Posting Article """
         article = request.data
 
-        serializer = self.serializer_class(data=article)
+        serializer = self.serializer_class(
+            data=article, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save(author=request.user)
 
@@ -57,7 +58,8 @@ class RetrieveArticleAPIView(generics.RetrieveUpdateDestroyAPIView):
     def retrieve(self, request, slug):
         try:
             article = Article.objects.get(slug=slug)
-            serializer = self.serializer_class(article)
+            serializer = self.serializer_class(
+                article, context={'request': request})
             return Response(serializer.data)
         except Article.DoesNotExist:
             response = {

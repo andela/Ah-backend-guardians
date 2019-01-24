@@ -1,10 +1,11 @@
 from django.test import TestCase
+from django.urls import reverse
+from django.conf import settings
+
 from rest_framework import status
 from rest_framework.utils.serializer_helpers import OrderedDict
 from rest_framework.test import APITestCase, APIClient
 from authors.apps.authentication.tests.base import BaseTestCase
-from django.urls import reverse
-from django.conf import settings
 
 from authors.apps.authentication.tests.data import login_info
 from authors.apps.articles.tests.data import login_info2
@@ -13,8 +14,7 @@ from .data import article_body
 from authors.apps.authentication.models import User
 from rest_framework.test import (
     APITestCase,
-    APIClient,
-    APIRequestFactory
+    APIClient
 )
 
 
@@ -216,3 +216,44 @@ class TestArticle(BaseTestCase):
         self.assertEqual(response3.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response3.data['error'],
                          'You already rated this article')
+                         
+    def test_get_facebook_link(self):
+        """Test if the user can get facebook link"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        fb_response = self.client.get(
+            reverse("article:detail", args=[slug]),  format='json')
+        self.assertEqual(fb_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            fb_response.data['social_links']['facebook'],
+            'https://www.facebook.com/sharer/sharer.php?'
+            'u=http%3A//testserver/api/articles/my-best-day-in-2018/')
+
+    def test_get_twitter_link(self):
+        """Test if the user can get twitter link"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        tw_response = self.client.get(
+            reverse("article:detail", args=[slug]),  format='json')
+        self.assertEqual(tw_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            tw_response.data['social_links']['twitter'],
+            "https://twitter.com/home?status=http%3A//"
+            "testserver/api/articles/my-best-day-in-2018/")
+
+    def test_email_article_link(self):
+        """Test if the user can send email link"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        em_response = self.client.get(
+            reverse("article:detail", args=[slug]),  format='json')
+        self.assertEqual(em_response.status_code, status.HTTP_200_OK)
