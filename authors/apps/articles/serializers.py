@@ -1,9 +1,9 @@
 
 from django.contrib.auth import authenticate
 from rest_framework import serializers
-from rest_framework import status, exceptions
 from ..authentication.serializers import UserSerializer
-from .models import Article
+from .models import Article, Rating
+from ..authentication.models import User
 
 
 class CreateArticleAPIViewSerializer(serializers.ModelSerializer):
@@ -13,7 +13,8 @@ class CreateArticleAPIViewSerializer(serializers.ModelSerializer):
         model = Article
         fields = ('id', 'title', 'body', 'description',
                   'author', 'slug', 'published', 'created_at',
-                  'updated_at', 'images', 'read_time', 'tags')
+                  'updated_at', 'images', 'read_time', 'tags',
+                  'average_rating')
 
     def validate_title(self, value):
         if len(value) > 255:
@@ -22,9 +23,26 @@ class CreateArticleAPIViewSerializer(serializers.ModelSerializer):
             )
         return value
 
-    def validate_description(self, value):
-        if len(value) > 255:
-            raise serializers.ValidationError(
-                'The article should not be more than 255 characters'
-            )
-        return value
+
+def validate_description(self, value):
+    if len(value) > 255:
+        raise serializers.ValidationError(
+            'The article should not be more than 255 characters'
+        )
+    return value
+
+
+class RatingSerializer(serializers.ModelSerializer):
+
+    """
+    Serializer for rating an article model
+    """
+    article = serializers.PrimaryKeyRelatedField(
+        queryset=Article.objects.all())
+    score = serializers.IntegerField(
+        required=True, max_value=5, min_value=1)
+    reader = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
+    class Meta:
+        model = Rating
+        fields = ("score", "article", "reader")

@@ -12,3 +12,8 @@ article_body = "1. I thought of putting pen into book, turning dark ink\
         of the terror at night because you're the light in\
         which the sun draws her strength. I'm not afraid\
         to love you because forever is just a start with you."
+
+login_info2 = {
+    'email': 'nserekopaul@gmail.com',
+    'password': 'Password1'
+}

@@ -1,0 +1,56 @@
+[
+{
+  "model": "authentication.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$ijmE3pHkU91W$qjrokLxvATdlSHj+uYQBQve3zC9O6DAbSrA2OCcLFS8=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "myrdstom",
+    "email": "nserekopaul@gmail.com",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2019-01-22T12:24:41.832Z",
+    "updated_at": "2019-01-22T12:26:28.773Z",
+    "email_verified": true,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$v1hUyyWwKoFG$qV0uQt46jgtX6aWquCb2/7LzeZyU/6Q0/wICMs25/NM=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "kayongo",
+    "email": "nserekopaul@ymail.com",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2019-01-22T12:24:54.309Z",
+    "updated_at": "2019-01-22T12:26:12.612Z",
+    "email_verified": true,
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "authentication.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$120000$E0zd568QSBuF$VFC4D9K2LgO8jGpYTnj5VKywXA6ZZyqFa34N5b2kIuU=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "paul",
+    "email": "paul.kayongo@andela.com",
+    "is_active": true,
+    "is_staff": false,
+    "created_at": "2019-01-22T12:25:19.961Z",
+    "updated_at": "2019-01-22T12:26:17.878Z",
+    "email_verified": true,
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]
