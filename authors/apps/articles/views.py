@@ -21,6 +21,7 @@ from authors.settings import RPD
 from ..authentication.models import User
 from .models import Article
 from rest_framework import generics
+from rest_framework.pagination import LimitOffsetPagination
 
 
 class CreateArticleAPIView(generics.ListCreateAPIView):
@@ -28,6 +29,9 @@ class CreateArticleAPIView(generics.ListCreateAPIView):
     renderer_classes = (ArticlesJSONRenderer,)
     queryset = Article.objects.all()
     serializer_class = CreateArticleAPIViewSerializer
+    pagination_class = LimitOffsetPagination
+    pagination_class.default_limit = 10
+    pagination_class.offset_query_param = 'page'
 
     def post(self, request):
         """ Method For Posting Article """
