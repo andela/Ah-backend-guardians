@@ -13,6 +13,9 @@ class Comment(models.Model):
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
+    start_index = models.IntegerField(blank=True, null=True)
+    end_index = models.IntegerField(blank=True, null=True)
+    selected_text = models.TextField(blank=True, null=True)
 
 
 class LikeComment(models.Model):

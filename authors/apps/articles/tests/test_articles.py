@@ -391,7 +391,7 @@ class TestArticle(BaseTestCase):
         self.assertEqual(response3.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response3.data['error'],
                          'You already rated this article')
-
+                         
     def test_get_facebook_link(self):
         """Test if the user can get facebook link"""
         self.client.credentials(
@@ -427,7 +427,7 @@ class TestArticle(BaseTestCase):
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
         response = self.client.post(
-            self.url1, data=self.article, format='json')
+            self.url, data=self.article, format='json')
         slug = response.data.get('slug')
         em_response = self.client.get(
             reverse("article:detail", args=[slug]),  format='json')

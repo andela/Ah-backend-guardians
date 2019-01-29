@@ -27,4 +27,5 @@ urlpatterns = [
          name="get_article_dislike"),
     path('articles/<slug>/favorite/', FavouritesView.as_view()),
     path('favorites/', FavouritesView.as_view(), name="favorited_articles"),
+    
 ]

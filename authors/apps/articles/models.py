@@ -117,7 +117,6 @@ class Article(models.Model):
             self.read_time = self.calculate_reading_time()
         super(Article, self).save(*args, **kwargs)
 
-
 class Rating(models.Model):
     """
     Model for rating an article

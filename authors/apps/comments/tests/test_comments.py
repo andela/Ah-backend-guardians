@@ -39,7 +39,6 @@ class CommentArticleTest(BaseTestCase):
         """Tests users can comment on an article"""
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
         response = self.client.post(self.url, comment, format='json')
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['message'],
                          'Comment Successfully added')
