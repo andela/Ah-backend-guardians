@@ -430,3 +430,33 @@ class TestArticle(BaseTestCase):
         em_response = self.client.get(
             reverse("article:detail", args=[slug]),  format='json')
         self.assertEqual(em_response.status_code, status.HTTP_200_OK)
+
+    def test_search_by_key_word(self):
+        """
+        Test search article by key word
+        """
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        self.client.post(
+            self.url, data=self.article, format='json')
+        search_url = self.url+'?search=Chou'
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_second_user_token())
+        response2 = self.client.get(
+            search_url, data=self.rate_high_score, format='json')
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)
+
+    def test_filter_by_title(self):
+        """
+        Test search article by key word
+        """
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        self.client.post(
+            self.url, data=self.article, format='json')
+        search_url = self.url+'?title=Africa'
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_second_user_token())
+        response2 = self.client.get(
+            search_url, data=self.rate_high_score, format='json')
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)

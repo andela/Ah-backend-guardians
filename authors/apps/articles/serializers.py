@@ -7,6 +7,7 @@ from rest_framework import serializers
 from ..authentication.serializers import UserSerializer
 from .models import Article, Rating, ArticleLikes, ArticleDisLikes
 from ..authentication.models import User
+import django_filters
 
 
 class CreateArticleAPIViewSerializer(serializers.ModelSerializer):

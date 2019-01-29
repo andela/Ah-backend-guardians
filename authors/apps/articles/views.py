@@ -10,8 +10,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework import generics, status, filters
 from .models import Article, Rating, ArticleLikes, ArticleDisLikes
 from authors import settings
-
-
+from .filters import ArticleFilter
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from .serializers import (
@@ -39,7 +38,7 @@ class CreateArticleAPIView(generics.ListCreateAPIView):
     filter_backends = (DjangoFilterBackend, SearchFilter)
     filter_class = ArticleFilter
     search_fields = ('title', 'body', 'description',
-                        'tags', 'author__username')
+                     'tags', 'author__username')
 
     def post(self, request):
         """ Method For Posting Article """
@@ -164,7 +163,7 @@ class LikeArticleStatus(generics.RetrieveAPIView):
     def get_object(self, *args, **kwargs):
         slug = self.kwargs.get("slug")
         article_like = ArticleLikes.objects.filter(
-            article__slug=slug, user=self.request.user).first()   
+            article__slug=slug, user=self.request.user).first()
         if article_like:
             return article_like
 
