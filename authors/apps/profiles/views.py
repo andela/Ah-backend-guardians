@@ -12,6 +12,7 @@ from .exceptions import (ProfileDoesNotExist, UserCannotEditProfile,
                          exception_messages)
 from .renderers import ProfileJSONRenderer, ReadingStatsJSONRenderer
 from authors.apps.authentication.models import User
+from authors.apps.notifications.backends import NotificationAction
 
 
 class RetrieveProfileView(generics.RetrieveAPIView):
@@ -85,6 +86,19 @@ class FollowProfileView(generics.UpdateAPIView):
 
             return Response(data=response_data, status=status.HTTP_200_OK)
         else:
+            notification = NotificationAction()
+            user_id = User.objects.filter(username=username).values('id')[
+                0]['id']
+
+            followed_profile = Profile.objects.get(user_id=user_id)
+
+            user_id = User.objects.filter(
+                                          username=request.user.username
+                                          ).values('id')[0]['id']
+
+            follower_profile = Profile.objects.get(user_id=user_id)
+            notification.profile_followed(request, follower_profile,
+                                          followed_profile)
             response_data = {
                 'message': 'You have followed {}!'.format(username)}
             return Response(data=response_data, status=status.HTTP_200_OK)

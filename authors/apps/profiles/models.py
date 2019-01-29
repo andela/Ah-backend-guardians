@@ -44,6 +44,7 @@ class Profile(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     followers = models.ManyToManyField(User, related_name='is_following',
                                        blank=True, symmetrical=False)
+    email_notification_permissions = models.BooleanField(default=True)
 
     objects = ProfileManager()
 

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'authors.apps.profiles',
     'authors.apps.articles',
     'authors.apps.comments',
+    'authors.apps.notifications',
     'rest_social_auth',
 
 ]

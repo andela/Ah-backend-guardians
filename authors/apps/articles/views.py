@@ -26,6 +26,28 @@ from django.shortcuts import render
 from django.template.defaultfilters import slugify
 from .renderers import (ArticleJSONRenderer, ArticlesJSONRenderer,
                         ArticlesLikesJSONRenderer)
+from .renderers import ArticleJSONRenderer, ArticlesJSONRenderer
+from rest_framework import status, exceptions
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from rest_framework.generics import get_object_or_404
+from rest_framework import generics, status
+from .models import Article
+from authors import settings
+
+
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from .serializers import (
+    CreateArticleAPIViewSerializer
+)
+from authors.settings import RPD
+from ..authentication.models import User
+from .models import Article
+from rest_framework import generics
+from rest_framework.pagination import LimitOffsetPagination
+from authors.apps.notifications.backends import NotificationAction
+from authors.apps.profiles.models import Profile
 
 
 class CreateArticleAPIView(generics.ListCreateAPIView):
@@ -49,6 +71,17 @@ class CreateArticleAPIView(generics.ListCreateAPIView):
         response = serializer.data
 
         response.update(article)
+        article_slug = response['slug']
+
+        notify = NotificationAction()
+
+        user_id = User.objects.filter(email=request.user.email).values('id')[
+            0]['id']
+        followers = Profile.objects.get(user__pk=user_id).followers.all()
+
+        author_profile = Profile.objects.get(user_id=user_id)
+        notify.article_created(request, followers, author_profile,
+                               article_slug)
 
         return Response(response, status=status.HTTP_201_CREATED)
 
