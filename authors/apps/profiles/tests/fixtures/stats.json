@@ -1,0 +1,27 @@
+[
+    {
+      "model": "profiles.readingstat",
+      "pk": 1,
+      "fields": {
+        "user": "bgpeter",
+        "articles": "code",
+        "date": "2019-01-15T08:15:37.696Z"
+      }
+    },
+    {
+        "model": "articles.article",
+        "pk": 1,
+        "fields": {
+          "title": "How to code",
+          "author": 1,
+          "body": "This is how I learnt how to code",
+          "description": "coding 101",
+          "slug": "code",
+          "published": true,
+          "created_at": "2019-01-21T09:49:45.193Z",
+          "updated_at": "2019-01-21T09:49:45.193Z",
+          "images": "[]",
+          "read_time": 0
+        }
+      }
+]

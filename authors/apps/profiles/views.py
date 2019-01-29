@@ -4,13 +4,13 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.exceptions import PermissionDenied
 
-from .serializers import ProfileSerializer
-from .models import Profile
+from .serializers import ProfileSerializer, ReadingStatsSerializer
+from .models import Profile, ReadingStat
 from .exceptions import (ProfileDoesNotExist, UserCannotEditProfile,
                          exception_messages)
-from .renderers import ProfileJSONRenderer
+from .renderers import ProfileJSONRenderer, ReadingStatsJSONRenderer
 from authors.apps.authentication.models import User
 
 
@@ -140,3 +140,35 @@ class RetrieveFollowingView(generics.ListAPIView):
             return Response(data=msg, status=status.HTTP_400_BAD_REQUEST)
         msg = {'following': following}
         return Response(data=msg, status=status.HTTP_200_OK)
+
+
+class ReadingStatsView(generics.ListAPIView):
+    """View class for retrieving the reading statistics of a user"""
+    permission_classes = (IsAuthenticated, )
+    serializer_class = ReadingStatsSerializer
+    renderer_classes = (ReadingStatsJSONRenderer, )
+
+    def get_queryset(self, *args, **kwargs):
+        user = self.kwargs.get('username')
+        records = ReadingStat.objects.all().filter(user=user)
+
+        return [articles.articles for articles in records]
+
+    def get(self, request, username):
+
+        if username != request.user.username:
+            raise PermissionDenied({
+                "message": "Unauthorized to view these stats"
+            })
+        articles = self.get_queryset()
+        total_read_time = 0
+        for article in articles:
+            total_read_time += article.read_time
+
+        data = {
+            'user': request.user.username,
+            'no._of_articles_read': len(articles),
+            'total_read_time': total_read_time,
+            'recent_articles': [article.id for article in articles[:5]],
+        }
+        return Response(data)
