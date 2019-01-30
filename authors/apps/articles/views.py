@@ -25,11 +25,14 @@ from rest_framework.exceptions import (
     PermissionDenied, ParseError, NotFound, ValidationError)
 from rest_framework.response import Response
 from rest_framework import serializers
-from rest_framework.response import Response
 
 from authors.settings import RPD
 from .renderers import (ArticleJSONRenderer, ArticlesJSONRenderer,
                         ArticlesLikesJSONRenderer, BookmarksJSONRenderer)
+from rest_framework import generics, status, filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+from authors.apps.articles.filters import ArticleFilter
 
 
 class CreateArticleAPIView(generics.ListCreateAPIView):
@@ -40,6 +43,10 @@ class CreateArticleAPIView(generics.ListCreateAPIView):
     pagination_class = LimitOffsetPagination
     pagination_class.default_limit = 10
     pagination_class.offset_query_param = 'page'
+    filter_backends = (DjangoFilterBackend, SearchFilter)
+    filter_class = ArticleFilter
+    search_fields = ('title', 'body', 'description',
+                     'tags', 'author__username')
 
     def post(self, request):
         """ Method For Posting Article """
