@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Comment, LikeComment
+from .models import Comment, LikeComment, EditHistory
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -16,3 +16,13 @@ class LikeCommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'comment', 'user')
         model = LikeComment
+
+
+class CommentHistorySerializer(serializers.ModelSerializer):
+    """
+    Class Handling History of Comment Edited
+    """
+
+    class Meta:
+        model = EditHistory
+        fields = ('id', 'body', 'created_at', 'user')
