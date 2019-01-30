@@ -1,28 +1,30 @@
+from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework import generics
+from .models import Article, Favourites
+from ..authentication.models import User
+from authors.settings import RPD
+from .serializers import (
+    CreateArticleAPIViewSerializer, RatingSerializer, LikeArticleSerializer,
+    DisLikeArticleSerializer, FavouriteSerializer
+)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.generics import get_object_or_404, GenericAPIView
+from authors import settings
+from .models import Article, Rating, ArticleLikes, ArticleDisLikes
+from rest_framework import generics, status
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied, ParseError
+from rest_framework import status, exceptions
 import uuid
 import jwt
 from django.shortcuts import render
 from django.template.defaultfilters import slugify
-from .renderers import ArticleJSONRenderer, ArticlesJSONRenderer, ArticlesLikesJSONRenderer
-from rest_framework import status, exceptions
-from rest_framework.exceptions import PermissionDenied, ParseError
-from rest_framework.response import Response
-from rest_framework.generics import get_object_or_404
-from rest_framework import generics, status
-from .models import Article, Rating, ArticleLikes, ArticleDisLikes
-from authors import settings
-
-
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
-from .serializers import (
-    CreateArticleAPIViewSerializer, RatingSerializer, LikeArticleSerializer, DisLikeArticleSerializer
-)
-from authors.settings import RPD
-from ..authentication.models import User
-from rest_framework import generics
-from rest_framework.pagination import LimitOffsetPagination
-from django.core.exceptions import ObjectDoesNotExist
-from django.http import JsonResponse
+from .renderers import (ArticleJSONRenderer, ArticlesJSONRenderer,
+                        ArticlesLikesJSONRenderer)
 
 
 class CreateArticleAPIView(generics.ListCreateAPIView):
@@ -157,7 +159,7 @@ class LikeArticleStatus(generics.RetrieveAPIView):
     def get_object(self, *args, **kwargs):
         slug = self.kwargs.get("slug")
         article_like = ArticleLikes.objects.filter(
-            article__slug=slug, user=self.request.user).first()   
+            article__slug=slug, user=self.request.user).first()
         if article_like:
             return article_like
 
@@ -198,7 +200,7 @@ class LikeArticleAPIView(generics.UpdateAPIView):
         """
         Updates the article with the reader's like choice
         params:
-        request, 
+        request,
         slug param
 
         Returns:
@@ -259,7 +261,7 @@ class DisLikeArticleAPIView(generics.UpdateAPIView):
         """
         Updates the article with the reader's like choice
         params:
-        request, 
+        request,
         slug param
 
         Returns:
@@ -294,3 +296,68 @@ class DisLikeArticleAPIView(generics.UpdateAPIView):
                 disliked_article.article_dislike = True
                 disliked_article.save()
                 return self.dislike_response_message(dislike_status[0])
+
+
+class FavouritesView(GenericAPIView):
+    serializer_class = FavouriteSerializer
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (ArticleJSONRenderer,)
+
+    def get_object(self, **kwargs):
+        article_slug = self.kwargs.get('slug')
+        article_obj = get_object_or_404(Article, slug=article_slug)
+        return article_obj
+
+    def put(self, request, **kwargs):
+        article = self.get_object()
+        user = request.user
+        article_id = article.id
+        fav = Favourites.objects.filter(
+            article_id=article_id, user=user
+        ).first()
+        if fav:
+            current_count = article.favouriteCount
+            if fav.favourite:
+                if current_count == 1:
+                    article.favorited = False
+                fav.favourite = False
+                article.favouriteCount = current_count - 1
+                response_data = {
+                    "message": "article has been unfavorited"
+                }
+            else:
+                fav.favourite = True
+                article.favouriteCount = current_count + 1
+                response_data = {
+                    "message": "article has been favorited"
+                }
+            fav.save()
+            article.save()
+            return Response(response_data, status=200)
+
+        else:
+            serializer = self.serializer_class(data={}, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=user,
+                            article=article, favourite=True)
+
+            article.favouriteCount = article.favouriteCount + 1
+            article.favorited = True
+            article.save()
+
+            return Response({"message": "article has been favorited"
+                             }, status=200)
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        queryset = Favourites.objects.filter(favourite=True, user=user)
+
+        serializer = FavouriteSerializer(
+            queryset, many=True, context={'request': request})
+
+        if not serializer.data:
+            return Response({
+                "message": "No Article Favorited Yet"
+            },
+                status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.data, status.HTTP_200_OK)

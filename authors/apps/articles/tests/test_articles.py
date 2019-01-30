@@ -45,6 +45,7 @@ class TestArticle(BaseTestCase):
         }
 
         self.url = reverse('article:create_article')
+        self.url1 = reverse('article:create_article')
 
     def get_user_token(self):
         request = self.log_in_user(login_info)
@@ -425,7 +426,7 @@ class TestArticle(BaseTestCase):
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
         response = self.client.post(
-            self.url, data=self.article, format='json')
+            self.url1, data=self.article, format='json')
         slug = response.data.get('slug')
         em_response = self.client.get(
             reverse("article:detail", args=[slug]),  format='json')

@@ -2,7 +2,8 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import (CreateArticleAPIView,
                     RetrieveArticleAPIView, LikeArticleAPIView,
-                    DisLikeArticleAPIView, CreateRatingsView, LikeArticleStatus, DisLikeArticleStatus,)
+                    DisLikeArticleAPIView, CreateRatingsView,
+                    LikeArticleStatus, DisLikeArticleStatus, FavouritesView)
 
 
 urlpatterns = [
@@ -18,6 +19,9 @@ urlpatterns = [
          name="dislike_article"),
     path('articles/<slug>/get_article_like/', LikeArticleStatus.as_view(),
          name="get_article_like"),
-    path('articles/<slug>/get_article_dislike/', DisLikeArticleStatus.as_view(),
+    path('articles/<slug>/get_article_dislike/',
+         DisLikeArticleStatus.as_view(),
          name="get_article_dislike"),
+    path('articles/<slug>/favorite/', FavouritesView.as_view()),
+    path('favorites/', FavouritesView.as_view(), name="favorited_articles"),
 ]
