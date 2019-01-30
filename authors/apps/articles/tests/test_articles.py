@@ -9,6 +9,7 @@ from authors.apps.authentication.tests.base import BaseTestCase
 
 from authors.apps.authentication.tests.data import login_info
 from authors.apps.articles.tests.data import login_info2
+from authors.apps.profiles.models import ReadingStat
 from ..models import Article
 from .data import article_body
 from authors.apps.authentication.models import User
@@ -431,3 +432,15 @@ class TestArticle(BaseTestCase):
         em_response = self.client.get(
             reverse("article:detail", args=[slug]),  format='json')
         self.assertEqual(em_response.status_code, status.HTTP_200_OK)
+
+    def test_read_article(self):
+        """Tests that user is added to database after reading an article"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.get(
+            self.url + 'coding/', format='json')
+        user = User.objects.get(email="f.faraqhan91234@gmail.com")
+        article = Article.objects.get(slug='coding')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(ReadingStat.objects.all().filter(
+            user=user.username, articles=article.slug))

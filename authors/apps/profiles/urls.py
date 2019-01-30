@@ -2,7 +2,7 @@ from django.conf.urls import url, include
 from rest_framework.urlpatterns import format_suffix_patterns
 from .views import (RetrieveProfileView, UpdateProfileView,
                     FollowProfileView, RetrieveFollowersView,
-                    RetrieveFollowingView, ListProfileView)
+                    RetrieveFollowingView, ListProfileView, ReadingStatsView)
 from django.urls import path
 
 urlpatterns = {
@@ -16,6 +16,8 @@ urlpatterns = {
          name="followers"),
     path('profile/following/', RetrieveFollowingView.as_view(),
          name="following"),
+    path('profiles/<username>/reading-stats/',
+         ReadingStatsView.as_view(), name='reading_stats')
 }
 
 urlpatterns = format_suffix_patterns(urlpatterns)

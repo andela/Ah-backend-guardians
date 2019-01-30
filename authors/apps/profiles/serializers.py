@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
-from .models import Profile
+from .models import Profile, ReadingStat
+
+from authors.apps.articles.serializers import CreateArticleAPIViewSerializer
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -15,3 +17,11 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ('email', 'bio', 'image', 'first_name', 'last_name')
+
+
+class ReadingStatsSerializer(serializers.ModelSerializer):
+    """Serializer for generating the reading stats of a user"""
+
+    class Meta:
+        model = ReadingStat
+        fields = ('user', 'articles', 'date')

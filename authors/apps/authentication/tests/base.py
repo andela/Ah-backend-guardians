@@ -5,7 +5,8 @@ from rest_framework.test import APITestCase
 class BaseTestCase(APITestCase):
 
     fixtures = ['authors/apps/authentication/tests/fixtures/user.json',
-                   'authors/apps/articles/tests/fixtures/user.json' ]
+                'authors/apps/articles/tests/fixtures/user.json',
+                'authors/apps/articles/tests/fixtures/articles.json']
 
     def register_user(self, signup_data):
         url = reverse("authentication:register")

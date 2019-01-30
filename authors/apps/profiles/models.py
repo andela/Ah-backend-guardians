@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from authors.apps.authentication.models import User
+from authors.apps.articles.models import Article
 
 
 class ProfileManager(models.Manager):
@@ -57,3 +58,12 @@ def create_user_profile(sender, instance, created, **kwargs):
         instance.profile.save()
 
 
+class ReadingStat(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             to_field='username')
+    articles = models.ForeignKey(Article, on_delete=models.CASCADE,
+                                 to_field='slug')
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.user)

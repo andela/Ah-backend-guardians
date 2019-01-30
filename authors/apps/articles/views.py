@@ -4,6 +4,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework import generics
 from .models import Article, Favourites
 from ..authentication.models import User
+from authors.apps.profiles.models import ReadingStat
 from authors.settings import RPD
 from .serializers import (
     CreateArticleAPIViewSerializer, RatingSerializer, LikeArticleSerializer,
@@ -63,6 +64,9 @@ class RetrieveArticleAPIView(generics.RetrieveUpdateDestroyAPIView):
             article = Article.objects.get(slug=slug)
             serializer = self.serializer_class(
                 article, context={'request': request})
+            if article.author.pk != request.user.pk:
+                ReadingStat.objects.get_or_create(
+                    user=request.user, articles=article)
             return Response(serializer.data)
         except Article.DoesNotExist:
             response = {
