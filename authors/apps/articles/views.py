@@ -2,31 +2,32 @@ import uuid
 import jwt
 from django.shortcuts import render
 from django.template.defaultfilters import slugify
-from .renderers import ArticleJSONRenderer, ArticlesJSONRenderer
+from .renderers import ArticleJSONRenderer, ArticlesJSONRenderer, ArticlesLikesJSONRenderer
 from rest_framework import status, exceptions
 from rest_framework.exceptions import PermissionDenied, ParseError
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from rest_framework import generics, status
-from .models import Article, Rating
+from .models import Article, Rating, ArticleLikes, ArticleDisLikes
 from authors import settings
 
 
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from .serializers import (
-    CreateArticleAPIViewSerializer, RatingSerializer
+    CreateArticleAPIViewSerializer, RatingSerializer, LikeArticleSerializer, DisLikeArticleSerializer
 )
 from authors.settings import RPD
 from ..authentication.models import User
-from .models import Article
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import JsonResponse
 
 
 class CreateArticleAPIView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
-    renderer_classes = (ArticlesJSONRenderer,)
+    renderer_classes = (ArticlesJSONRenderer, )
     queryset = Article.objects.all()
     serializer_class = CreateArticleAPIViewSerializer
     pagination_class = LimitOffsetPagination
@@ -145,3 +146,151 @@ class CreateRatingsView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LikeArticleStatus(generics.RetrieveAPIView):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (ArticlesLikesJSONRenderer,)
+    serializer_class = LikeArticleSerializer
+    queryset = ArticleLikes.objects.all()
+
+    def get_object(self, *args, **kwargs):
+        slug = self.kwargs.get("slug")
+        article_like = ArticleLikes.objects.filter(
+            article__slug=slug, user=self.request.user).first()   
+        if article_like:
+            return article_like
+
+
+class DisLikeArticleStatus(generics.RetrieveAPIView):
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (ArticlesLikesJSONRenderer,)
+    serializer_class = DisLikeArticleSerializer
+
+    def get_object(self, *args, **kwargs):
+        slug = self.kwargs.get("slug")
+        article_dislikes = ArticleDisLikes.objects.filter(
+            article__slug=slug, user=self.request.user).first()
+        if article_dislikes:
+            return article_dislikes
+
+
+class LikeArticleAPIView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = ArticleLikes.objects.all()
+
+    def get_object(self):
+        """Method to get an article"""
+        slug = self.kwargs.get("slug")
+        return get_object_or_404(Article, slug=slug)
+
+    def get_queryset(self, request):
+        """Method to get liked or disliked articles"""
+        article = self.get_object()
+        liked_article = self.queryset.filter(
+            article=article, user=request.user).first()
+        return liked_article
+
+    def like_response_message(self, message):
+        return Response(message, status=status.HTTP_200_OK)
+
+    def put(self, request, slug):
+        """
+        Updates the article with the reader's like choice
+        params:
+        request, 
+        slug param
+
+        Returns:
+        HTTP Response
+        HTTP Status code
+        """
+        user = request.user
+        article = self.get_object()
+        liked_article = self.get_queryset(request)
+        disliked_article = ArticleDisLikes.objects.filter(
+            article=article, user=request.user).first()
+        like_status = [{"message": "liked"}, {"message": "unliked"}]
+
+        if not liked_article:
+            if disliked_article:
+                disliked_article.delete()
+
+                article_likes = ArticleLikes.objects.create(
+                    article=article, user=user, article_like=True)
+                article_likes.save()
+                return self.like_response_message(like_status[0])
+            article_likes = ArticleLikes.objects.create(
+                article=article, user=user, article_like=True)
+            article_likes.save()
+            return self.like_response_message(like_status[0])
+
+        else:
+            if liked_article.article_like:
+                liked_article.article_like = False
+                liked_article.save()
+                return self.like_response_message(like_status[1])
+            else:
+                liked_article.article_like = True
+                liked_article.save()
+                return self.like_response_message(like_status[0])
+
+
+class DisLikeArticleAPIView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = ArticleDisLikes.objects.all()
+
+    def get_object(self):
+        """Method to get an article"""
+        slug = self.kwargs.get("slug")
+        return get_object_or_404(Article, slug=slug)
+
+    def get_queryset(self, request):
+        """Method to get liked or disliked articles"""
+        article = self.get_object()
+        disliked_article = self.queryset.filter(
+            article=article, user=request.user).first()
+        return disliked_article
+
+    def dislike_response_message(self, message):
+        return Response(message, status=status.HTTP_200_OK)
+
+    def put(self, request, slug):
+        """
+        Updates the article with the reader's like choice
+        params:
+        request, 
+        slug param
+
+        Returns:
+        HTTP Response
+        HTTP Status code
+        """
+        user = request.user
+        article = self.get_object()
+        disliked_article = self.get_queryset(request)
+        liked_article = ArticleLikes.objects.filter(
+            article=article, user=request.user).first()
+        dislike_status = [{"message": "disliked"}, {"message": "undisliked"}]
+
+        if not disliked_article:
+            if liked_article:
+                liked_article.delete()
+                article_dislikes = ArticleDisLikes.objects.create(
+                    article=article, user=user, article_dislike=True)
+                article_dislikes.save()
+                return self.dislike_response_message(dislike_status[0])
+            article_dislikes = ArticleDisLikes.objects.create(
+                article=article, user=user, article_dislike=True)
+            article_dislikes.save()
+            return self.dislike_response_message(dislike_status[0])
+
+        else:
+            if disliked_article.article_dislike:
+                disliked_article.article_dislike = False
+                disliked_article.save()
+                return self.dislike_response_message(dislike_status[1])
+            else:
+                disliked_article.article_dislike = True
+                disliked_article.save()
+                return self.dislike_response_message(dislike_status[0])

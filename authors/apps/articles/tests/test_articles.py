@@ -172,9 +172,6 @@ class TestArticle(BaseTestCase):
         response2 = self.client.put(
             rate_url, data=self.rate_high_score, format='json')
         self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
-        # print(response2.data)
-        # self.assertIn(response2.data['score'],
-        #                  ['Ensure this value is less than or equal'])
 
     def test_article_does_not_exist(self):
         """
@@ -193,6 +190,182 @@ class TestArticle(BaseTestCase):
         self.assertEqual(response2.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response2.data['detail'],
                          'Not found.')
+
+    def test_like_article_doesnot_exist(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = "vivian-cohort"
+        like_url = reverse("article:like_article", args=[slug])
+        get_response = self.client.put(like_url, format='json')
+        self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_like_article_that_exists(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+        like_url = reverse("article:like_article", args=[slug])
+        get_response = self.client.put(like_url, format='json')
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(get_response.data['message'], 'liked')
+
+    def test_like_article(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+        like_url = reverse("article:like_article", args=[slug])
+        like_response = self.client.put(like_url, format='json')
+        self.assertEqual(like_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(like_response.data['message'], 'liked')
+
+    def test_like_article_you_disliked(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+        dislike_url = reverse("article:dislike_article", args=[slug])
+        dislike_response = self.client.put(dislike_url, format='json')
+        like_url = reverse("article:like_article", args=[slug])
+        like_response = self.client.put(like_url, format='json')
+        self.assertEqual(dislike_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(dislike_response.data['message'], 'disliked')
+        self.assertEqual(like_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(like_response.data['message'], 'liked')
+
+    def test_unlike_article(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+        like_url = reverse("article:like_article", args=[slug])
+        like_response = self.client.put(like_url, format='json')
+        unlike_response = self.client.put(like_url, format='json')
+        unlike_like_response = self.client.put(like_url, format='json')
+        self.assertEqual(like_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(like_response.data['message'], 'liked')
+        self.assertEqual(unlike_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(unlike_response.data['message'], 'unliked')
+        self.assertEqual(unlike_like_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(unlike_like_response.data['message'], 'liked')
+
+    def test_dislike_article(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+        dislike_url = reverse("article:dislike_article", args=[slug])
+        dislike_response = self.client.put(dislike_url, format='json')
+        self.assertEqual(dislike_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(dislike_response.data['message'], 'disliked')
+
+    def test_dislike_article_you_liked(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+        like_url = reverse("article:like_article", args=[slug])
+        like_response = self.client.put(like_url, format='json')
+        dislike_url = reverse("article:dislike_article", args=[slug])
+        dislike_response = self.client.put(dislike_url, format='json')
+        self.assertEqual(like_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(like_response.data['message'], 'liked')
+        self.assertEqual(dislike_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(dislike_response.data['message'], 'disliked')
+
+    def test_undislike_article(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+        dislike_url = reverse("article:dislike_article", args=[slug])
+        dislike_response = self.client.put(dislike_url, format='json')
+        undislike_response = self.client.put(dislike_url, format='json')
+        undislike_dislike_response = self.client.put(
+            dislike_url, format='json')
+        self.assertEqual(dislike_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(dislike_response.data['message'], 'disliked')
+        self.assertEqual(undislike_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(undislike_response.data['message'], 'undisliked')
+        self.assertEqual(
+            undislike_dislike_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            undislike_dislike_response.data['message'], 'disliked')
+
+    def test_get_like_article_that_doesnot_exist(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        dislike_url = reverse("article:dislike_article", args=[slug])
+        self.client.put(dislike_url, format='json')
+        get_like_url = reverse("article:get_article_like", args=[slug])
+        get_like_response = self.client.get(get_like_url, format='json')
+        self.assertEqual(get_like_response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(
+            get_like_response.data, {'article_like': False})
+
+    def test_get_like_article(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        like_url = reverse("article:like_article", args=[slug])
+        self.client.put(like_url, format='json')
+        get_like_url = reverse("article:get_article_like", args=[slug])
+        get_like_response = self.client.get(get_like_url, format='json')
+        self.assertEqual(get_like_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            get_like_response.data, {'article_like': True})
+
+    def test_get_dislike_article_that_doesnot_exist(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        like_url = reverse("article:like_article", args=[slug])
+        self.client.put(like_url, format='json')
+        get_dislike_url = reverse("article:get_article_dislike", args=[slug])
+        get_dislike_response = self.client.get(get_dislike_url, format='json')
+        self.assertEqual(get_dislike_response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(
+            get_dislike_response.data, {'article_dislike': False})
+
+    def test_get_dislike_article(self):
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        dislike_url = reverse("article:dislike_article", args=[slug])
+        self.client.put(dislike_url, format='json')
+        get_dislike_url = reverse("article:get_article_dislike", args=[slug])
+        get_dislike_response = self.client.get(get_dislike_url, format='json')
+        self.assertEqual(get_dislike_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            get_dislike_response.data, {'article_dislike': True})
 
     def test_try_and_fail_to_rate_an_article_again(self):
         """
@@ -216,7 +389,7 @@ class TestArticle(BaseTestCase):
         self.assertEqual(response3.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response3.data['error'],
                          'You already rated this article')
-                         
+
     def test_get_facebook_link(self):
         """Test if the user can get facebook link"""
         self.client.credentials(
