@@ -2,10 +2,10 @@ from urllib.parse import quote
 
 from django.urls import reverse
 
-from django.contrib.auth import authenticate
 from rest_framework import serializers
 from ..authentication.serializers import UserSerializer
-from .models import Article, Rating, ArticleLikes, ArticleDisLikes, Favourites
+from .models import (Article, Rating, ArticleLikes,
+                     ArticleDisLikes, Favourites, Bookmark)
 from ..authentication.models import User
 
 
@@ -38,12 +38,12 @@ class CreateArticleAPIViewSerializer(serializers.ModelSerializer):
 
     def get_social_links(self, obj):
         social_links = dict()
-        parsed_title = quote(obj.title)
         article_url = self.context['request'].build_absolute_uri(
             reverse("article:detail", args=[obj.slug]))
         share_string = quote(article_url)
         # generating facebook links
-        facebook_url = f"https://www.facebook.com/sharer/sharer.php?u={share_string}"
+        facebook_url = f"https://www.facebook.com/sharer/s" \
+            f"harer.php?u={share_string}"
         social_links['facebook'] = facebook_url
         # generating twitter links
         twitter_url = f"https://twitter.com/home?status={share_string}"
@@ -101,3 +101,34 @@ class FavouriteSerializer(serializers.ModelSerializer):
         fields = [
             'article', 'favourite', 'user'
         ]
+
+
+class BookmarkSerializer(serializers.ModelSerializer):
+    """
+    Serializer for bookmarking an article model
+    """
+    title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+    read_time = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    slug = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Bookmark
+        fields = ("id", "title", "description",
+                  "read_time", "author", "created_at", "reader", "slug")
+
+    def get_title(self, obj):
+        return obj.article.title
+
+    def get_description(self, obj):
+        return obj.article.description
+
+    def get_read_time(self, obj):
+        return obj.article.read_time
+
+    def get_author(self, obj):
+        return obj.article.author.username
+
+    def get_slug(self, obj):
+        return obj.article.slug

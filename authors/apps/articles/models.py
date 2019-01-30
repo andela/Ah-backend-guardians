@@ -160,3 +160,13 @@ class Favourites(models.Model):
         Article, related_name="article_id",
         on_delete=models.CASCADE, null=True)
     favourite = models.BooleanField(default=False)
+
+
+class Bookmark(models.Model):
+    """
+    Class Implementing The Bookmark Model.
+    """
+    reader = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    article = models.ForeignKey(
+        Article, on_delete=models.CASCADE, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -4,7 +4,8 @@ from .views import (CreateArticleAPIView,
                     RetrieveArticleAPIView, LikeArticleAPIView,
                     DisLikeArticleAPIView, CreateRatingsView,
                     LikeArticleStatus, DisLikeArticleStatus, FavouritesView,
-                    RetrieveMyArticles)
+                    CreateDeleteBookmarkArticleView, ListBookmarksView,
+                    RetrieveBoomarkView, RetrieveMyArticles)
 
 
 urlpatterns = [
@@ -27,4 +28,9 @@ urlpatterns = [
          name="get_article_dislike"),
     path('articles/<slug>/favorite/', FavouritesView.as_view()),
     path('favorites/', FavouritesView.as_view(), name="favorited_articles"),
+    path('articles/<slug>/bookmark/',
+         CreateDeleteBookmarkArticleView.as_view(), name="create_bookmark"),
+    path('bookmarks/', ListBookmarksView.as_view(), name="bookmarks"),
+    path('bookmarks/<slug>/',
+         RetrieveBoomarkView.as_view(), name="bookmark_detail"),
 ]
