@@ -4,15 +4,13 @@ from .views import (CreateArticleAPIView,
                     RetrieveArticleAPIView, LikeArticleAPIView,
                     DisLikeArticleAPIView, CreateRatingsView,
                     LikeArticleStatus, DisLikeArticleStatus, FavouritesView,
-                    CreateBookmarkArticleView, ListBookmarksView,
+                    ReportArticleView, GetReportedArticleView, CreateBookmarkArticleView, ListBookmarksView,
                     RetrieveDeleteBoomarkView, RetrieveMyArticles)
 
 
 urlpatterns = [
-    path('articles/', CreateArticleAPIView.as_view(), name="create_article"),
-    path('articles/my_articles/', RetrieveMyArticles.as_view(),
-         name="view_my_articles"),
     path('articles/<slug>/', RetrieveArticleAPIView.as_view(), name="detail"),
+    path('articles/', CreateArticleAPIView.as_view(), name="create_article"),
     path('articles/<slug>/rating/', CreateRatingsView.as_view(),
          name="ratings_list"),
     path('articles/<slug>/rating/<article_id>', CreateRatingsView.as_view(),
@@ -27,10 +25,15 @@ urlpatterns = [
          DisLikeArticleStatus.as_view(),
          name="get_article_dislike"),
     path('articles/<slug>/favorite/', FavouritesView.as_view()),
+    path('articles/<slug>/report/',
+         ReportArticleView.as_view(), name="report_article"),
     path('favorites/', FavouritesView.as_view(), name="favorited_articles"),
     path('articles/<slug>/bookmark/',
          CreateBookmarkArticleView.as_view(), name="create_bookmark"),
     path('bookmarks/', ListBookmarksView.as_view(), name="bookmarks"),
     path('bookmarks/<slug>/',
          RetrieveDeleteBoomarkView.as_view(), name="bookmark_detail"),
+    
+    path('articles/report/<username>/',
+         GetReportedArticleView.as_view(), name="get_user_reported_articles"),
 ]

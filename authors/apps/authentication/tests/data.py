@@ -169,7 +169,7 @@ wrong_fb_token = {
 }
 
 fb_token = {
-    'access_token':"correct_access_token"
+    'access_token': "correct_access_token"
 }
 
 google_token = {
@@ -177,7 +177,6 @@ google_token = {
 }
 
 twitter_token = {
-	"access_token": "access_token",
-	"access_token_secret": "access_token_secret"
+    "access_token": "access_token",
+    "access_token_secret": "access_token_secret"
 }
-

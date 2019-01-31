@@ -5,7 +5,8 @@ from django.urls import reverse
 from rest_framework import serializers
 from ..authentication.serializers import UserSerializer
 from .models import (Article, Rating, ArticleLikes,
-                     ArticleDisLikes, Favourites, Bookmark)
+                     ArticleDisLikes, Favourites, Bookmark,
+                    ReportArticle)
 from ..authentication.models import User
 
 
@@ -132,3 +133,14 @@ class BookmarkSerializer(serializers.ModelSerializer):
 
     def get_slug(self, obj):
         return obj.article.slug
+        
+class ReportSerializer(serializers.ModelSerializer):
+    """
+    Report article class.
+    """
+    article = CreateArticleAPIViewSerializer(read_only=True)
+    reported_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ReportArticle
+        fields = ("reported_by", "reason", "reported_at", "article")

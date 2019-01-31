@@ -1,13 +1,11 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.conf import settings
-
 from rest_framework import status
 from rest_framework.utils.serializer_helpers import OrderedDict
 from rest_framework.test import APITestCase, APIClient
 from authors.apps.authentication.tests.base import BaseTestCase
-
-from authors.apps.authentication.tests.data import login_info
+from authors.apps.authentication.tests.data import login_info, user3
 from authors.apps.articles.tests.data import login_info2
 from authors.apps.profiles.models import ReadingStat
 from ..models import Article, Bookmark
@@ -44,10 +42,14 @@ class TestArticle(BaseTestCase):
 
             "score": 8
         }
+        self.report_reason = {
+
+            "reason": "This article violets the rules"
+
+        }
 
         self.url = reverse('article:create_article')
         self.url1 = reverse('article:create_article')
-
     def get_user_token(self):
         request = self.log_in_user(login_info)
         return request.data['token']
@@ -445,15 +447,6 @@ class TestArticle(BaseTestCase):
         self.assertTrue(ReadingStat.objects.all().filter(
             user=user.username, articles=article.slug))
 
-    def test_get_my_articles(self):
-        """Tests that a user can get only articles they authored"""
-        self.client.credentials(
-            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
-        response = self.client.get(
-            self.url + 'my_articles/', format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['results'], [])
-
     def test_bookmark_article_object_created(self):
         """Test if the bookmark object created"""
         user = User.objects.create_user(
@@ -588,3 +581,65 @@ class TestArticle(BaseTestCase):
         self.assertEqual(lf_response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(lf_response.data.get('error'),
                          'You do not have permission to perform this action.')
+
+    def test_report_your_own_article(self):
+        """Test if the user can an report their own article"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+        report_article_url = reverse("article:report_article", args=[slug])
+        get_response = self.client.post(
+            report_article_url, data=self.report_reason, format='json')
+        self.assertEqual(get_response.status_code,  status.HTTP_403_FORBIDDEN)
+        self.assertEqual(get_response.data,  {
+                         "message": "You cannot report your own article"})
+
+    def test_report_another_persons_article(self):
+        """Test if the user can an report another person's article"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_second_user_token())
+        report_article_url = reverse("article:report_article", args=[slug])
+        get_response = self.client.post(
+            report_article_url, data=self.report_reason, format='json')
+        self.assertEqual(get_response.status_code,  status.HTTP_201_CREATED)
+
+    def test_report_same_article_twice(self):
+        """Test if the user can an report an article twice"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        slug = response.data.get('slug')
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_second_user_token())
+        report_article_url = reverse("article:report_article", args=[slug])
+        self.client.post(report_article_url,
+                         data=self.report_reason, format='json')
+        post_response = self.client.post(report_article_url,
+                                         data=self.report_reason, format='json')
+
+        self.assertEqual(post_response.status_code,  status.HTTP_200_OK)
+        self.assertEqual(post_response.data,  {
+                         'message': 'You have already reported this article'})
+
+    def test_get_list_of_articles_reported_by_user(self):
+        """Test if the user can get articles he / she has reported"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        username = user3["username"]
+        report_article_url = reverse("article:get_user_reported_articles", args=[username])
+
+        get_response = self.client.get(report_article_url, format='json')
+        self.assertEqual(get_response.status_code,  status.HTTP_200_OK)
