@@ -29,7 +29,7 @@ from .renderers import (ArticleJSONRenderer, ArticlesJSONRenderer,
 
 
 class CreateArticleAPIView(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     renderer_classes = (ArticlesJSONRenderer, )
     queryset = Article.objects.all()
     serializer_class = CreateArticleAPIViewSerializer
@@ -54,7 +54,7 @@ class CreateArticleAPIView(generics.ListCreateAPIView):
 
 
 class RetrieveArticleAPIView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly, )
     renderer_classes = (ArticleJSONRenderer,)
     serializer_class = CreateArticleAPIViewSerializer
     queryset = Article.objects.all()
@@ -64,7 +64,8 @@ class RetrieveArticleAPIView(generics.RetrieveUpdateDestroyAPIView):
             article = Article.objects.get(slug=slug)
             serializer = self.serializer_class(
                 article, context={'request': request})
-            if article.author.pk != request.user.pk:
+            logged_in = request.user.is_authenticated
+            if logged_in and article.author.pk != request.user.pk:
                 ReadingStat.objects.get_or_create(
                     user=request.user, articles=article)
             return Response(serializer.data)
@@ -91,7 +92,10 @@ class RetrieveArticleAPIView(generics.RetrieveUpdateDestroyAPIView):
             raise PermissionDenied
 
         serializer = self.serializer_class(
-            article_instance, data=article, partial=True)
+            article_instance,
+            data=article,
+            context={'request': request},
+            partial=True)
 
         serializer.is_valid(raise_exception=True)
         serializer.save(author=request.user)

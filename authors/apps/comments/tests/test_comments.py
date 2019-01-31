@@ -59,13 +59,6 @@ class CommentArticleTest(BaseTestCase):
         self.assertEqual(response.data['message'],
                          'Comment successfully deleted')
 
-    def test_access_comments_without_authentication(self):
-        """Tests users should be logged in to access the comments api"""
-        response = self.client.get(self.url)
-        self.assertEqual(
-            response.data['detail'],
-            'Authentication credentials were not provided.')
-
     def test_comment_on_comment(self):
         """Tests creating a thread of successive comments"""
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
