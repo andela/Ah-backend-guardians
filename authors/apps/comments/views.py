@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from . import serializers
 from .utils import Utils
@@ -12,7 +12,7 @@ from rest_framework.generics import get_object_or_404
 
 
 class CreateCommentAPiView(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = serializers.CommentSerializer
 
     queryset = Comment.objects.all()
@@ -43,7 +43,7 @@ class CreateCommentAPiView(generics.ListCreateAPIView):
 
 
 class CommentApiView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = serializers.CommentSerializer
     util = Utils()
 
@@ -98,7 +98,7 @@ class CommentApiView(generics.RetrieveUpdateDestroyAPIView):
 class CommentThreadApiView(generics.ListCreateAPIView):
 
     queryset = Comment.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = serializers.CommentSerializer
     util = Utils()
 
@@ -132,7 +132,7 @@ class CommentThreadApiView(generics.ListCreateAPIView):
 
 class LikeCommentApiView(generics.RetrieveUpdateAPIView):
 
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = serializers.LikeCommentSerializer
     renderer_classes = (LikeComementsJSONRenderer, )
 
@@ -171,6 +171,6 @@ class LikeCommentApiView(generics.RetrieveUpdateAPIView):
 
 class GetCommentApiView(generics.RetrieveAPIView):
 
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticatedOrReadOnly, )
     serializer_class = serializers.LikeCommentSerializer
     queryset = LikeComment.objects.all()
