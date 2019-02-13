@@ -116,6 +116,19 @@ class RetrieveArticleAPIView(generics.RetrieveUpdateDestroyAPIView):
         )
 
 
+class RetrieveMyArticles(generics.ListAPIView):
+    serializer_class = CreateArticleAPIViewSerializer
+    permission_classes = (IsAuthenticated, )
+    renderer_classes = (ArticlesJSONRenderer,)
+    queryset = Article.objects.all()
+    pagination_class = LimitOffsetPagination
+    pagination_class.default_limit = 10
+    pagination_class.offset_query_param = 'page'
+
+    def get_queryset(self, *args, **kwargs):
+        return self.queryset.filter(author=self.request.user)
+
+
 class CreateRatingsView(generics.UpdateAPIView):
     """
     Class to handle the rating of articles
