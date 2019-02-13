@@ -444,3 +444,12 @@ class TestArticle(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(ReadingStat.objects.all().filter(
             user=user.username, articles=article.slug))
+
+    def test_get_my_articles(self):
+        """Tests that a user can get only articles they authored"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.get(
+            self.url + 'my_articles/', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['results'], [])
