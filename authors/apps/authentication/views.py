@@ -23,7 +23,6 @@ import uuid
 import twitter
 from google.oauth2 import id_token
 from google.auth.transport import requests
-# from django.template.defaultfilters import slugify
 
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -348,6 +347,7 @@ class GoogleAPIView(CreateAPIView):
                 'username': user.username,
                 'token': user.generate_token(user_dict)
             }, status=status.HTTP_201_CREATED)
+
 
 class TwitterAPIView(CreateAPIView):
     permission_classes = (AllowAny,)

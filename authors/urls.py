@@ -28,4 +28,7 @@ urlpatterns = [
     path('api/', include(('authors.apps.comments.urls',
                          'comments'), namespace='comments')),
     path('api/auth/login/', include('rest_social_auth.urls_token')),
+    path('api/notifications/', include(('authors.apps.notifications.urls',
+                                        'notifications'),
+                                       namespace='notifications'))
 ]

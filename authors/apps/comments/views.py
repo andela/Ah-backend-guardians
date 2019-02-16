@@ -9,6 +9,9 @@ from .models import Comment, LikeComment
 from .renderers import LikeComementsJSONRenderer
 from authors.apps.articles.models import Article
 from rest_framework.generics import get_object_or_404
+from authors.apps.notifications.backends import NotificationAction
+from authors.apps.profiles.models import Profile
+from authors.apps.authentication.models import User
 
 
 class CreateCommentAPiView(generics.ListCreateAPIView):
@@ -28,6 +31,16 @@ class CreateCommentAPiView(generics.ListCreateAPIView):
         serializer = self.serializer_class(data=comment)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
+        user_id = User.objects.filter(
+            username=request.user.username
+        ).values('id')[0]['id']
+
+        comment_author = Profile.objects.get(user_id=user_id)
+        article_author = article.author
+        article_author = Profile.objects.get(user_id=article_author.pk)
+        notify = NotificationAction()
+        notify.comment_created(request, comment_author, article_author, slug)
         return Response({"message": "Comment Successfully added"},
                         status=status.HTTP_201_CREATED)
 
