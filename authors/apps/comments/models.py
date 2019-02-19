@@ -19,3 +19,14 @@ class LikeComment(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+
+
+class EditHistory(models.Model):
+
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return str(self.body)

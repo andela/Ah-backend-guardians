@@ -1,14 +1,16 @@
 from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 
 from . import serializers
 from .utils import Utils
-from .models import Comment, LikeComment
-from .renderers import LikeComementsJSONRenderer
+from .models import Comment, LikeComment, EditHistory
+from .renderers import LikeComementsJSONRenderer, CommentJSONRenderer
 from authors.apps.articles.models import Article
 from rest_framework.generics import get_object_or_404
+from .serializers import CommentHistorySerializer
 
 
 class CreateCommentAPiView(generics.ListCreateAPIView):
@@ -65,6 +67,8 @@ class CommentApiView(generics.RetrieveUpdateDestroyAPIView):
 
         if request.user.pk == comment.author.id:
             Comment.objects.all().filter(pk=id).update(**request.data)
+            EditHistory.objects.create(
+                comment=comment, body=comment.body, user=request.user)
             msg = "Comment successfully updated"
             return Response({
                 "message": msg
@@ -174,3 +178,27 @@ class GetCommentApiView(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly, )
     serializer_class = serializers.LikeCommentSerializer
     queryset = LikeComment.objects.all()
+
+
+class CommentHistoryListView(generics.ListAPIView):
+    """
+    Class For Fetching Comment Edit History
+    """
+    serializer_class = CommentHistorySerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    renderer_classes = (CommentJSONRenderer,)
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        comment = self.kwargs.get('id')
+        queryset = EditHistory.objects.filter(user=user, comment=comment)
+
+        serializer = CommentHistorySerializer(
+            queryset, many=True)
+
+        if not serializer.data:
+            return Response({
+                "message": "No Edit History For To This Comment"
+            },
+                status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.data, status.HTTP_200_OK)
