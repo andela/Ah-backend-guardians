@@ -26,6 +26,26 @@ from django.shortcuts import render
 from django.template.defaultfilters import slugify
 from .renderers import (ArticleJSONRenderer, ArticlesJSONRenderer,
                         ArticlesLikesJSONRenderer)
+from rest_framework import status, exceptions
+from rest_framework.exceptions import PermissionDenied, ParseError
+from rest_framework.response import Response
+from rest_framework.generics import get_object_or_404
+from rest_framework import generics, status
+from .models import Article, Rating, ArticleLikes, ArticleDisLikes
+from authors import settings
+
+
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from .serializers import (
+    CreateArticleAPIViewSerializer, RatingSerializer, LikeArticleSerializer, DisLikeArticleSerializer
+)
+from authors.settings import RPD
+from ..authentication.models import User
+from rest_framework import generics
+from rest_framework.pagination import LimitOffsetPagination
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import JsonResponse
 
 
 class CreateArticleAPIView(generics.ListCreateAPIView):
@@ -221,7 +241,7 @@ class LikeArticleAPIView(generics.UpdateAPIView):
         """
         Updates the article with the reader's like choice
         params:
-        request,
+        request, 
         slug param
 
         Returns:

@@ -16,7 +16,6 @@ from .serializers import CommentHistorySerializer
 class CreateCommentAPiView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = serializers.CommentSerializer
-
     queryset = Comment.objects.all()
     util = Utils()
 
@@ -25,12 +24,19 @@ class CreateCommentAPiView(generics.ListCreateAPIView):
 
         slug = self.kwargs['slug']
         article = self.util.check_article(slug)
+        start_index = request.data.get('start_index')
+        end_index = request.data.get('end_index')
+        selected_text = self.util.comment_on_selected(
+            start_index, end_index, article)
+        request.data['selected_text'] = selected_text
         comment = request.data
         comment.update({'author': request.user.pk, 'article': article.id})
         serializer = self.serializer_class(data=comment)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"message": "Comment Successfully added"},
+        return Response({
+            "comment": serializer.data,
+            "message": "Comment Successfully added"},
                         status=status.HTTP_201_CREATED)
 
     def get(self, *args, **kwargs):
@@ -119,7 +125,9 @@ class CommentThreadApiView(generics.ListCreateAPIView):
         serializer = self.serializer_class(data=comment)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"message": "Comment Thread Successfully added"},
+        return Response({
+            "comment": serializer.data,
+            "message": "Comment Thread Successfully added"},
                         status=status.HTTP_201_CREATED)
 
     def get(self, request, id, *args, **kwargs):
