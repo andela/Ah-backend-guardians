@@ -1,31 +1,35 @@
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework import generics
-from .models import Article, Favourites
+from rest_framework import status, exceptions, generics
+from .models import (Article, Favourites, Rating,
+                     ArticleLikes, ArticleDisLikes, Bookmark)
 from ..authentication.models import User
 from authors.apps.profiles.models import ReadingStat
-from authors.settings import RPD
 from .serializers import (
     CreateArticleAPIViewSerializer, RatingSerializer, LikeArticleSerializer,
-    DisLikeArticleSerializer, FavouriteSerializer
+    DisLikeArticleSerializer, FavouriteSerializer, BookmarkSerializer
 )
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.generics import get_object_or_404, GenericAPIView
 from authors import settings
-from .models import Article, Rating, ArticleLikes, ArticleDisLikes
-from rest_framework import generics, status
-from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied, ParseError
-from rest_framework import status, exceptions
+
 import uuid
 import jwt
+
 from django.shortcuts import render
 from django.template.defaultfilters import slugify
+
+from rest_framework.exceptions import (
+    PermissionDenied, ParseError, NotFound, ValidationError)
+from rest_framework.response import Response
+from rest_framework import serializers
+from rest_framework.response import Response
+
+from authors.settings import RPD
 from .renderers import (ArticleJSONRenderer, ArticlesJSONRenderer,
-                        ArticlesLikesJSONRenderer)
+                        ArticlesLikesJSONRenderer, BookmarksJSONRenderer)
 
 
 class CreateArticleAPIView(generics.ListCreateAPIView):
@@ -382,3 +386,79 @@ class FavouritesView(GenericAPIView):
             },
                 status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.data, status.HTTP_200_OK)
+
+
+class CreateDeleteBookmarkArticleView(generics.UpdateAPIView):
+    """
+    Class to handle the bookmarking of an articles
+    """
+    serializer_class = BookmarkSerializer
+    permission_classes = (IsAuthenticated, )
+    queryset = Bookmark.objects.all()
+    renderer_classes = (BookmarksJSONRenderer,)
+
+    def get_object(self, slug):
+        try:
+            article = Article.objects.get(slug=slug)
+            return article
+        except Article.DoesNotExist:
+            raise NotFound(
+                {'error': 'Article  your trying to '
+                          'bookmark does not exist'})
+
+    def put(self, request, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        article = self.get_object(slug)
+        title = article.title
+        bookmark = self.get_queryset().filter(reader=self.request.user,
+                                              article=article)
+        if bookmark:
+            bookmark.delete()
+            return Response(
+                {"message": f"You have unbookmarked this "
+                            f"article called {article.title}"},
+                status=status.HTTP_200_OK
+            )
+        bookmark = Bookmark.objects.create(
+            article=article, reader=request.user)
+        serializer = self.serializer_class(bookmark)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ListBookmarksView(generics.ListAPIView):
+    """
+    Class to list all bookmarks
+    """
+    serializer_class = BookmarkSerializer
+    permission_classes = (IsAuthenticated, )
+    queryset = Bookmark.objects.all()
+    renderer_classes = (BookmarksJSONRenderer,)
+
+    def get_queryset(self):
+        return self.queryset.filter(reader=self.request.user)
+
+
+class RetrieveBoomarkView(generics.RetrieveAPIView):
+    """
+    Class to delete or retrieve a bookmark
+    """
+    serializer_class = BookmarkSerializer
+    permission_classes = (IsAuthenticated,)
+    renderer_classes = (BookmarksJSONRenderer,)
+
+    def get_object(self):
+        article_slug = self.kwargs.get('slug')
+        try:
+            article = Article.objects.get(slug=article_slug)
+            bookmark = Bookmark.objects.get(article=article)
+            if bookmark.reader != self.request.user:
+                raise PermissionDenied(
+                    {"error": "You do not have permission to "
+                              "perform this action."})
+        except Article.DoesNotExist:
+            raise NotFound(
+                {'error': 'Bookmark does not exist'})
+        except Bookmark.DoesNotExist:
+            raise NotFound(
+                {'error': 'Bookmark does not exist'})
+        return bookmark

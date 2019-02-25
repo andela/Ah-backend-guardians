@@ -225,3 +225,10 @@ class TestResetPassword(APITestCase):
                     ]
                 }
             })
+
+    def test_confirmation_redirect(self):
+        self.user_logged_in()
+        response = self.client.get(
+            '/api/password-reset-confirm/sqr6-57Kb6dc3333efvbn1de-bHVnam9zaC'
+        )
+        self.assertEqual(response.status_code, 302)

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.contrib.auth.hashers import make_password
+from django.shortcuts import redirect
 
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView
@@ -212,8 +213,9 @@ class ResetPasswordConfirmAPIView(RetrieveUpdateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ResetPasswordConfirmSerializer
 
-    def get_object(self):
-        return {"password": "", "confirm_password": ""}
+    def get(self, request, **kwargs):
+        slug = kwargs['slug'].split('-')[2]
+        return redirect('https://ah-frontend-guardians.herokuapp.com/reset-password/', slug)
 
     def update(self, request, **kwargs):
         serializer_data = request.data
