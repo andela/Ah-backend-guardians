@@ -10,7 +10,7 @@ from authors.apps.authentication.tests.base import BaseTestCase
 from authors.apps.authentication.tests.data import login_info
 from authors.apps.articles.tests.data import login_info2
 from authors.apps.profiles.models import ReadingStat
-from ..models import Article
+from ..models import Article, Bookmark
 from .data import article_body
 from authors.apps.authentication.models import User
 from rest_framework.test import (
@@ -453,3 +453,144 @@ class TestArticle(BaseTestCase):
             self.url + 'my_articles/', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['results'], [])
+
+    def test_bookmark_article_object_created(self):
+        """Test if the bookmark object created"""
+        user = User.objects.create_user(
+            username='moses', email='moses@gmail.com',
+            password='Kamira123')
+        reader = User.objects.create_user(
+            username='fahad', email='fahad@gmail.com',
+            password='Kamira123')
+        user.is_verified = True
+        user = User.objects.filter(email='moses@gmail.com').first()
+        author = user
+        article = Article.objects.create(
+            title='article title', author=author)
+        bookmark = Bookmark.objects.create(
+            article=article, reader=reader)
+        self.assertIsInstance(bookmark, Bookmark)
+
+    def test_bookmark_article(self):
+        """Test if the user can bookmark an article"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        em_response = self.client.put(
+            reverse("article:create_bookmark", args=[slug]),  format='json')
+        self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(em_response.data.get(
+            'title'), self.article.get('title'))
+
+    def test_cant_bookmark_article_that_doesnt_exist(self):
+        """Test if the user can bookmark an article"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = 'twenty'
+        em_response = self.client.put(
+            reverse("article:create_bookmark", args=[slug]),  format='json')
+        self.assertEqual(em_response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(em_response.data.get(
+            'error'), 'Article  your trying to bookmark does not exist')
+
+    def test_article_already_bookmark(self):
+        """Test if the user cannot bookmark an article again"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        em_response = self.client.put(
+            reverse("article:create_bookmark", args=[slug]),  format='json')
+        self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
+        bookmark_response = self.client.put(
+            reverse("article:create_bookmark", args=[slug]),  format='json')
+        self.assertEqual(bookmark_response.status_code,
+                         status.HTTP_200_OK)
+        self.assertEqual(bookmark_response.data['message'],
+                         f"You have unbookmarked this "
+                         f"article called {self.article['title']}")
+
+    def test_return_all_your_bookmarks(self):
+        """Test if the user view all bookmarks"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        em_response = self.client.put(
+            reverse("article:create_bookmark", args=[slug]),  format='json')
+        self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
+        bookmark_response = self.client.get(
+            reverse("article:bookmarks"), format='json')
+        self.assertTrue(bookmark_response.data)
+        self.assertEqual(bookmark_response.status_code,
+                         status.HTTP_200_OK)
+
+    def test_delete_bookmark(self):
+        """Test if the user can delete a bookmark"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        em_response = self.client.put(
+            reverse("article:create_bookmark", args=[slug]),  format='json')
+        self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
+        em_response = self.client.put(
+            reverse("article:create_bookmark", args=[slug]), format='json')
+        self.assertEqual(em_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(em_response.data.get('message'),
+                         f"You have unbookmarked this "
+                         f"article called {self.article['title']}")
+
+    def test_get_one_bookmark(self):
+        """Test if the user can delete a bookmark"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        em_response = self.client.put(
+            reverse("article:create_bookmark", args=[slug]),  format='json')
+        self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
+        bookmark = em_response.data.get('slug')
+        em_response = self.client.get(
+            reverse("article:bookmark_detail",
+                    args=[bookmark]),  format='json')
+        self.assertEqual(em_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(em_response.data.get('title'),
+                         self.article.get('title'))
+
+    def test_cant_get_bookmark_doesnot_exist(self):
+        """Test if the user can't get a bookmark that doesnt exist"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        get_response = self.client.get(
+            reverse("article:bookmark_detail", args=['hello']), format='json')
+        self.assertEqual(get_response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(get_response.data.get('error'),
+                         'Bookmark does not exist')
+
+    def test_cant_get_bookmark_you_didnt_create(self):
+        """Test if the user can't get a bookmark he didnt create"""
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_user_token())
+        response = self.client.post(
+            self.url, data=self.article, format='json')
+        slug = response.data.get('slug')
+        em_response = self.client.put(
+            reverse("article:create_bookmark", args=[slug]),  format='json')
+        self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
+        bookmark = em_response.data.get('slug')
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + self.get_second_user_token())
+        lf_response = self.client.get(
+            reverse("article:bookmark_detail", args=[bookmark]), format='json')
+        self.assertEqual(lf_response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(lf_response.data.get('error'),
+                         'You do not have permission to perform this action.')

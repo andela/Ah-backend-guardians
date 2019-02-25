@@ -39,3 +39,17 @@ class ArticlesLikesJSONRenderer(JSONRenderer):
         return json.dumps({
             'article_status': data
         })
+
+
+class BookmarksJSONRenderer(JSONRenderer):
+    charset = 'utf-8'
+
+    def render(self, data, media_type=None, renderer_context=None):
+
+        if 'errors' in data or 'detail' in data or 'error' in data:
+
+            return super().render(data)
+        
+        return json.dumps({
+                'bookmarks': data
+            })
