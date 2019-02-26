@@ -38,8 +38,7 @@ class Profile(models.Model):
     first_name = models.CharField(max_length=255, blank=False)
     last_name = models.CharField(max_length=255, blank=False)
     bio = models.TextField(blank=True, null=True)
-    image = models.ImageField(
-        upload_to='images/avatar/', blank=True, null=True)
+    image = models.URLField(null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     followers = models.ManyToManyField(User, related_name='is_following',

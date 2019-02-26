@@ -2,7 +2,7 @@
 from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 
@@ -39,8 +39,7 @@ class UpdateProfileView(generics.UpdateAPIView):
                                        user__username=username)
         except Profile.DoesNotExist:
             raise PermissionDenied({
-                'error':  exception_messages.get('edit_profile_no\
-t_permitted').format(username)
+                'error':  exception_messages.get('edit_profile_not_permitted').format(username)
             })
 
 
@@ -48,7 +47,7 @@ class ListProfileView(generics.ListAPIView):
     """
     Implements get all user profile endpoint
     """
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticatedOrReadOnly, )
     renderer_classes = (ProfileJSONRenderer,)
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
