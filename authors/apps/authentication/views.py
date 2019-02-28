@@ -211,7 +211,7 @@ class ResetPasswordConfirmAPIView(RetrieveUpdateAPIView):
 
     def get(self, request, **kwargs):
         slug = kwargs['slug']
-        return redirect('https://localhost:8080/reset-password/' + slug)
+        return redirect('https://ah-frontend-guardians.herokuapp.com/reset-password/' + slug)
 
     def update(self, request, **kwargs):
         serializer_data = request.data
