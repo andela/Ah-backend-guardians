@@ -388,7 +388,7 @@ class FavouritesView(GenericAPIView):
         return Response(serializer.data, status.HTTP_200_OK)
 
 
-class CreateDeleteBookmarkArticleView(generics.UpdateAPIView):
+class CreateBookmarkArticleView(generics.CreateAPIView):
     """
     Class to handle the bookmarking of an articles
     """
@@ -406,19 +406,16 @@ class CreateDeleteBookmarkArticleView(generics.UpdateAPIView):
                 {'error': 'Article  your trying to '
                           'bookmark does not exist'})
 
-    def put(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         article = self.get_object(slug)
         title = article.title
         bookmark = self.get_queryset().filter(reader=self.request.user,
                                               article=article)
         if bookmark:
-            bookmark.delete()
-            return Response(
-                {"message": f"You have unbookmarked this "
-                            f"article called {article.title}"},
-                status=status.HTTP_200_OK
-            )
+            raise PermissionDenied(
+                {"error": "You cannot bookmark"
+                 "your own article"})
         bookmark = Bookmark.objects.create(
             article=article, reader=request.user)
         serializer = self.serializer_class(bookmark)
@@ -438,7 +435,7 @@ class ListBookmarksView(generics.ListAPIView):
         return self.queryset.filter(reader=self.request.user)
 
 
-class RetrieveBoomarkView(generics.RetrieveAPIView):
+class RetrieveDeleteBoomarkView(generics.RetrieveDestroyAPIView):
     """
     Class to delete or retrieve a bookmark
     """
@@ -462,3 +459,13 @@ class RetrieveBoomarkView(generics.RetrieveAPIView):
             raise NotFound(
                 {'error': 'Bookmark does not exist'})
         return bookmark
+
+    def delete(self, request, *args, **kwargs):
+        bookmark = self.get_object()
+        if bookmark:
+            bookmark.delete()
+            return Response(
+                {"message": f"You have unbookmarked the "
+                            f"article"},
+                status=status.HTTP_200_OK
+            )
