@@ -23,13 +23,6 @@ class RegistrationLoginViewTestCase(BaseTestCase):
         self.assertEqual(response.data['msg'], verify_user1['msg'])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_account_activated(self):
-        register = self.register_user(user1)
-        response = self.client.get(register.data['route'], format='json')
-        self.assertEqual(response.data['msg'],
-                         'Your account has been activated, congratulations')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
     def test_activation_link_invalid(self):
         url = '/api/users/530-9fea92310fa49fe3/c3Nkc3Nlc3NkczIzZDQ0c3Nmc2U/'
         response = self.client.get(url, format='json')
