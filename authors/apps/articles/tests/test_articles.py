@@ -478,7 +478,7 @@ class TestArticle(BaseTestCase):
         response = self.client.post(
             self.url, data=self.article, format='json')
         slug = response.data.get('slug')
-        em_response = self.client.put(
+        em_response = self.client.post(
             reverse("article:create_bookmark", args=[slug]),  format='json')
         self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(em_response.data.get(
@@ -491,7 +491,7 @@ class TestArticle(BaseTestCase):
         response = self.client.post(
             self.url, data=self.article, format='json')
         slug = 'twenty'
-        em_response = self.client.put(
+        em_response = self.client.post(
             reverse("article:create_bookmark", args=[slug]),  format='json')
         self.assertEqual(em_response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(em_response.data.get(
@@ -504,16 +504,13 @@ class TestArticle(BaseTestCase):
         response = self.client.post(
             self.url, data=self.article, format='json')
         slug = response.data.get('slug')
-        em_response = self.client.put(
+        em_response = self.client.post(
             reverse("article:create_bookmark", args=[slug]),  format='json')
         self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
-        bookmark_response = self.client.put(
+        bookmark_response = self.client.post(
             reverse("article:create_bookmark", args=[slug]),  format='json')
         self.assertEqual(bookmark_response.status_code,
-                         status.HTTP_200_OK)
-        self.assertEqual(bookmark_response.data['message'],
-                         f"You have unbookmarked this "
-                         f"article called {self.article['title']}")
+                         status.HTTP_403_FORBIDDEN)
 
     def test_return_all_your_bookmarks(self):
         """Test if the user view all bookmarks"""
@@ -522,7 +519,7 @@ class TestArticle(BaseTestCase):
         response = self.client.post(
             self.url, data=self.article, format='json')
         slug = response.data.get('slug')
-        em_response = self.client.put(
+        em_response = self.client.post(
             reverse("article:create_bookmark", args=[slug]),  format='json')
         self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
         bookmark_response = self.client.get(
@@ -538,15 +535,12 @@ class TestArticle(BaseTestCase):
         response = self.client.post(
             self.url, data=self.article, format='json')
         slug = response.data.get('slug')
-        em_response = self.client.put(
+        em_response = self.client.post(
             reverse("article:create_bookmark", args=[slug]),  format='json')
         self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
-        em_response = self.client.put(
-            reverse("article:create_bookmark", args=[slug]), format='json')
+        em_response = self.client.delete(
+            reverse("article:bookmark_detail", args=[slug]), format='json')
         self.assertEqual(em_response.status_code, status.HTTP_200_OK)
-        self.assertEqual(em_response.data.get('message'),
-                         f"You have unbookmarked this "
-                         f"article called {self.article['title']}")
 
     def test_get_one_bookmark(self):
         """Test if the user can delete a bookmark"""
@@ -555,7 +549,7 @@ class TestArticle(BaseTestCase):
         response = self.client.post(
             self.url, data=self.article, format='json')
         slug = response.data.get('slug')
-        em_response = self.client.put(
+        em_response = self.client.post(
             reverse("article:create_bookmark", args=[slug]),  format='json')
         self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
         bookmark = em_response.data.get('slug')
@@ -583,7 +577,7 @@ class TestArticle(BaseTestCase):
         response = self.client.post(
             self.url, data=self.article, format='json')
         slug = response.data.get('slug')
-        em_response = self.client.put(
+        em_response = self.client.post(
             reverse("article:create_bookmark", args=[slug]),  format='json')
         self.assertEqual(em_response.status_code, status.HTTP_201_CREATED)
         bookmark = em_response.data.get('slug')

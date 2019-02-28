@@ -24,7 +24,6 @@ import uuid
 import twitter
 from google.oauth2 import id_token
 from google.auth.transport import requests
-# from django.template.defaultfilters import slugify
 
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -117,10 +116,7 @@ class ActivateAccountView(CreateAPIView):
                 user.decode_token(token):
             user.email_verified = True
             user.save()
-            response_data = {
-                "msg": "Your account has been activated, congratulations",
-            }
-            return Response(response_data, status=status.HTTP_200_OK)
+            return redirect('https://ah-frontend-guardians.herokuapp.com/login/')
         error_msg = {"error": {"detail": 'Activation link is invalid!'}}
         return Response(error_msg, status=status.HTTP_400_BAD_REQUEST)
 
@@ -215,7 +211,7 @@ class ResetPasswordConfirmAPIView(RetrieveUpdateAPIView):
 
     def get(self, request, **kwargs):
         slug = kwargs['slug']
-        return redirect('https://localhost:8080/reset-password/' + slug)
+        return redirect('https://ah-frontend-guardians.herokuapp.com/reset-password/' + slug)
 
     def update(self, request, **kwargs):
         serializer_data = request.data
@@ -350,6 +346,7 @@ class GoogleAPIView(CreateAPIView):
                 'username': user.username,
                 'token': user.generate_token(user_dict)
             }, status=status.HTTP_201_CREATED)
+
 
 class TwitterAPIView(CreateAPIView):
     permission_classes = (AllowAny,)
