@@ -3,12 +3,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework import status, exceptions, generics
 from .models import (Article, Favourites, Rating,
-                     ArticleLikes, ArticleDisLikes, Bookmark)
+                     ArticleLikes, ArticleDisLikes, Bookmark,
+                     ReportArticle)
 from ..authentication.models import User
 from authors.apps.profiles.models import ReadingStat
 from .serializers import (
     CreateArticleAPIViewSerializer, RatingSerializer, LikeArticleSerializer,
-    DisLikeArticleSerializer, FavouriteSerializer, BookmarkSerializer
+    DisLikeArticleSerializer, FavouriteSerializer, BookmarkSerializer,
+    ReportSerializer
 )
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -29,7 +31,8 @@ from rest_framework.response import Response
 
 from authors.settings import RPD
 from .renderers import (ArticleJSONRenderer, ArticlesJSONRenderer,
-                        ArticlesLikesJSONRenderer, BookmarksJSONRenderer)
+                        ArticlesLikesJSONRenderer, BookmarksJSONRenderer,
+                        ReportJSONRenderer)
 
 
 class CreateArticleAPIView(generics.ListCreateAPIView):
@@ -469,3 +472,62 @@ class RetrieveDeleteBoomarkView(generics.RetrieveDestroyAPIView):
                             f"article"},
                 status=status.HTTP_200_OK
             )
+
+class ReportArticleView(generics.CreateAPIView):
+    """
+    View for user to report article
+    """
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ReportSerializer
+    renderer_classes = (ReportJSONRenderer,)
+    queryset = ReportArticle.objects.all()
+
+    def get_object(self, *args, **kwargs):
+        slug = self.kwargs.get('slug')
+        try:
+            article = Article.objects.get(slug=slug)
+            return article
+
+        except Article.DoesNotExist:
+            raise NotFound(
+                {'error': 'Article does not exist'})
+
+    def post(self, request, *args, **kwargs):
+        report = self.request.data
+        article = self.get_object()
+        user = self.request.user
+
+        reported_article = self.queryset.filter(
+            reported_by=self.request.user, article=article)
+
+        if article.author != self.request.user:
+            if reported_article:
+                return Response({"message":
+                                 "You have already reported this article"},
+                                status=status.HTTP_200_OK)
+            serializer = self.serializer_class(
+                data=report, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save(reported_by=user, article=article)
+            response = serializer.data
+
+            return Response(response, status=status.HTTP_201_CREATED)
+
+        raise PermissionDenied(
+            {"message": "You cannot report your own article"})
+
+
+class GetReportedArticleView(generics.ListAPIView):
+    """
+    Get all reported articles by a user
+    """
+    permission_classes = (IsAuthenticated, )
+    renderer_classes = (ReportJSONRenderer,)
+    serializer_class = ReportSerializer
+    queryset = ReportArticle.objects.all()
+    def get_queryset(self):
+        username = self.kwargs.get('username')
+        if username == self.request.user.username:
+            return self.queryset.filter(reported_by=self.request.user)
+        raise PermissionDenied(
+            {"message": "Unauthorized..."})
