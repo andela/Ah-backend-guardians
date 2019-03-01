@@ -26,10 +26,10 @@ class CreateCommentAPiView(generics.ListCreateAPIView):
         slug = self.kwargs['slug']
         article = self.util.check_article(slug)
         comment = request.data
-        comment.update({'author': request.user.pk, 'article': article.id})
+        comment.update({ 'article': article.id})
         serializer = self.serializer_class(data=comment)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(author=request.user)
         return Response({"message": "Comment Successfully added"},
                         status=status.HTTP_201_CREATED)
 
@@ -113,12 +113,11 @@ class CommentThreadApiView(generics.ListCreateAPIView):
         article = self.util.check_article(slug)
         parent = self.util.check_comment(id)
         comment = request.data
-        comment.update({'author': request.user.pk,
-                        'article': article.id,
+        comment.update({'article': article.id,
                         'parent': id})
         serializer = self.serializer_class(data=comment)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(author=request.user)
         return Response({"message": "Comment Thread Successfully added"},
                         status=status.HTTP_201_CREATED)
 
