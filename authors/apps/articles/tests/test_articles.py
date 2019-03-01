@@ -585,6 +585,6 @@ class TestArticle(BaseTestCase):
             HTTP_AUTHORIZATION='Bearer ' + self.get_second_user_token())
         lf_response = self.client.get(
             reverse("article:bookmark_detail", args=[bookmark]), format='json')
-        self.assertEqual(lf_response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(lf_response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(lf_response.data.get('error'),
-                         'You do not have permission to perform this action.')
+                         'Bookmark does not exist')
