@@ -447,25 +447,25 @@ class RetrieveDeleteBoomarkView(generics.RetrieveDestroyAPIView):
         article_slug = self.kwargs.get('slug')
         try:
             article = Article.objects.get(slug=article_slug)
-            bookmark = Bookmark.objects.get(article=article)
-            if bookmark.reader != self.request.user:
-                raise PermissionDenied(
-                    {"error": "You do not have permission to "
-                              "perform this action."})
+            bookmark = Bookmark.objects.filter(
+                article=article, reader=self.request.user).first()
+            if not bookmark:
+                raise NotFound(
+                    {'error': 'Bookmark does not exist'})
         except Article.DoesNotExist:
-            raise NotFound(
-                {'error': 'Bookmark does not exist'})
-        except Bookmark.DoesNotExist:
             raise NotFound(
                 {'error': 'Bookmark does not exist'})
         return bookmark
 
     def delete(self, request, *args, **kwargs):
         bookmark = self.get_object()
-        if bookmark:
-            bookmark.delete()
-            return Response(
-                {"message": f"You have unbookmarked the "
-                            f"article"},
-                status=status.HTTP_200_OK
-            )
+        if bookmark.reader != self.request.user:
+            raise PermissionDenied(
+                {"error": "You do not have permission to "
+                          "perform this action."})
+        bookmark.delete()
+        return Response(
+            {"message": f"You have unbookmarked the "
+                        f"article"},
+            status=status.HTTP_200_OK
+        )
