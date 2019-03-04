@@ -81,32 +81,24 @@ class RetrieveArticleAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def update(self, request, slug):
         """This method updates a user article"""
-
-        article = request.data.get('article', {})
-        article["author"] = request.user.email
-
-        article_instance = Article.objects.get(slug=slug)
-
-        slug = slugify(request.data.get("article")['title'].replace("_", "-"))
-        slug = slug + "-" + str(uuid.uuid4()).split("-")[-1]
-        article["slug"] = slug
-
-        if article_instance.author != request.user:
-
-            raise PermissionDenied
-
-        serializer = self.serializer_class(
-            article_instance,
-            data=article,
-            context={'request': request},
-            partial=True)
-
-        serializer.is_valid(raise_exception=True)
-        serializer.save(author=request.user)
-        data = serializer.data
-
-        data["message"] = "Article updated successfully."
-        return Response(data, status=status.HTTP_201_CREATED)
+        data = request.data.get('article', {})
+        try:
+            article = Article.objects.get(slug=slug)
+            if article.author != request.user:
+                raise PermissionDenied(
+                    {"error": "You do not have permission to"
+                        "perform this action."})
+            serializer = CreateArticleAPIViewSerializer(
+                article, data=data,
+                context={'request': request}, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            response = serializer.data
+            response['message'] = "Article updated successfully."
+            return Response(response, status=status.HTTP_201_CREATED)
+        except Article.DoesNotExist:
+            raise NotFound(
+                {'error': 'Article does not exist'})
 
     def destroy(self, request, slug):
         """This method allows a user to delete his article"""
@@ -394,7 +386,6 @@ class CreateBookmarkArticleView(generics.CreateAPIView):
     """
     serializer_class = BookmarkSerializer
     permission_classes = (IsAuthenticated, )
-    queryset = Bookmark.objects.all()
     renderer_classes = (BookmarksJSONRenderer,)
 
     def get_object(self, slug):
@@ -409,13 +400,14 @@ class CreateBookmarkArticleView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         slug = self.kwargs.get('slug')
         article = self.get_object(slug)
-        title = article.title
-        bookmark = self.get_queryset().filter(reader=self.request.user,
-                                              article=article)
-        if bookmark:
+        if article.author == self.request.user:
             raise PermissionDenied(
                 {"error": "You cannot bookmark"
-                 "your own article"})
+                 " your own article"})
+        if Bookmark.objects.filter(
+                reader=request.user).filter(article=article).exists():
+            raise PermissionDenied(
+                {"error": "You already bookmarked this article"})
         bookmark = Bookmark.objects.create(
             article=article, reader=request.user)
         serializer = self.serializer_class(bookmark)
@@ -452,17 +444,13 @@ class RetrieveDeleteBoomarkView(generics.RetrieveDestroyAPIView):
             if not bookmark:
                 raise NotFound(
                     {'error': 'Bookmark does not exist'})
+            return bookmark
         except Article.DoesNotExist:
             raise NotFound(
                 {'error': 'Bookmark does not exist'})
-        return bookmark
 
     def delete(self, request, *args, **kwargs):
         bookmark = self.get_object()
-        if bookmark.reader != self.request.user:
-            raise PermissionDenied(
-                {"error": "You do not have permission to "
-                          "perform this action."})
         bookmark.delete()
         return Response(
             {"message": f"You have unbookmarked the "
