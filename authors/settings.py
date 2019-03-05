@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'authors.apps.articles',
     'authors.apps.comments',
     'rest_social_auth',
+    'django_filters',
 
 ]
 
@@ -193,7 +194,9 @@ REST_FRAMEWORK = {
     'NON_FIELD_ERRORS_KEY': 'error',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'authors.apps.authentication.backends.JWTAuthentication',
+        
     ),
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
 }
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
