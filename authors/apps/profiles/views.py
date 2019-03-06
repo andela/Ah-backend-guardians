@@ -166,8 +166,8 @@ class ReadingStatsView(generics.ListAPIView):
 
         data = {
             'user': request.user.username,
-            'no._of_articles_read': len(articles),
+            'no_of_articles_read': len(articles),
             'total_read_time': total_read_time,
-            'recent_articles': [article.id for article in articles[:5]],
+            'recent_articles': [({"author": article.author.username, "description": article.description, "title": article.title, "slug": article.slug, "read_time": article.read_time}) for article in articles[:3]]
         }
         return Response(data)
