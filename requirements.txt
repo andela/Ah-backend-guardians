@@ -12,7 +12,7 @@ coverage==4.5.2
 cryptography==2.4.2
 defusedxml==0.5.0
 dj-database-url==0.5.0
-Django==2.1.5
+Django==2.2.10
 django-allauth==0.38.0
 django-braces==1.13.0
 django-cloudinary-storage==0.2.3
