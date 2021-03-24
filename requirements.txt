@@ -63,7 +63,7 @@ pytz==2018.9
 requests==2.21.0
 requests-oauthlib==1.0.0
 rest-social-auth==1.5.0
-rsa==4.0
+rsa==4.1
 ruamel.yaml==0.15.85
 simplejson==3.16.0
 six==1.12.0
